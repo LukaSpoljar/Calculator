@@ -16,8 +16,7 @@ export default function App() {
 
         const calculate = () => {
             if (userInput) {
-                let inputValue = (userInput as HTMLInputElement).value;
-                inputValue = inputValue.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
+                let inputValue = (userInput as HTMLInputElement).value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
                     let result = evaluate(inputValue);
                     if (Number(result) || result == 0) {
@@ -43,7 +42,7 @@ export default function App() {
                 (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                 if (event.target == clearButton) {
                     if (userInput) {
-                        (userInput as HTMLInputElement).value = (userInput as HTMLInputElement).value.toString().slice(0, -1);
+                        (userInput as HTMLInputElement).value = (userInput as HTMLInputElement).value.toString().slice(0, -1);;
                     }
                 } else if (event.target == resultButton) {
                     calculate();
@@ -62,7 +61,7 @@ export default function App() {
         <div id='app-wrapper'>
             <div id='up-section-wrapper'>
                 <div>
-                    <input id='user_input' placeholder='0' autoFocus />
+                    <input id='user_input' placeholder='0' autoFocus type='text' inputMode='none' />
                 </div>
                 <div>
                     <p id='result_text'>&nbsp;</p>
