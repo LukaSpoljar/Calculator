@@ -1,0 +1,131 @@
+#app-wrapper {
+    background-color: rgb(70, 184, 255);
+
+    height: 100%;
+    width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+
+    #up-section-wrapper {
+        display: flex;
+        flex-direction: column;
+
+        justify-content: space-between;
+
+        margin: 1em;
+
+        div {
+            display: flex;
+        }
+
+        div:nth-child(1) {
+            justify-content: start;
+
+            //  background-color: aqua;
+
+            input {
+                //    background-color: bisque;
+                width: 100%;
+
+                text-decoration: none;
+                border: 0;
+
+                outline: 0;
+
+                font-weight: bold;
+                font-size: x-large;
+                padding: 0.5em;
+            }
+
+            input::selection {
+                background-color: rgb(70, 184, 255);
+            }
+        }
+
+        div:nth-child(2) {
+            //background-color: aqua;
+
+            justify-content: end;
+
+            font-weight: 1000;
+            font-size: xx-large;
+        }
+    }
+
+    #down-section-wrapper {
+        display: flex;
+        flex-direction: row;
+
+        height: 100%;
+
+        //flex-grow: 1;
+
+        overflow: auto;
+
+        button {
+            flex-grow: 1;
+            border-radius: 0;
+            font-weight: bolder;
+            font-size: x-large;
+            width: 100%;
+
+            margin: 0;
+            padding: 0;
+            background-color: #1378c0;
+        }
+
+        #side-operations {
+            display: flex;
+            flex-direction: column;
+
+            width: 100%;
+            max-width: fit-content;
+
+            button {
+                background-color: rgb(5, 72, 120);
+            }
+
+            button:last-child {
+                //  background-color: rgb(13, 200, 13);
+            }
+        }
+
+        #symbols-and-digits-wrapper {
+            display: flex;
+            flex-wrap: nowrap;
+            flex-direction: column;
+            justify-content: stretch;
+            align-items: stretch;
+
+            height: 100%;
+            width: 100%;
+
+            #brackets {
+                width: 100%;
+                background-color: aqua;
+
+                display: flex;
+                flex-direction: row;
+            }
+
+            #clear-button {
+                background-color: rgb(5, 72, 120);
+            }
+
+            .one-row {
+                display: flex;
+                align-items: stretch;
+                justify-content: space-between;
+
+                flex-grow: 1;
+            }
+        }
+    }
+}
