@@ -1,10 +1,10 @@
 {
-  "short_name": "Calc",
-  "name": "Calculator",
+  "short_name": "Calculator",
+  "name": "Simply Simple Web Calculator",
   "author":"Ivan Luka Špoljar",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "logo.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
