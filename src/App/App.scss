@@ -19,9 +19,10 @@
 
         justify-content: space-between;
 
-        flex-grow: 1;
+        height: 20%;
+        min-height: 2cm;
 
-        //  padding: 1em;
+        padding: 0.5em;
 
         div {
             display: flex;
@@ -44,8 +45,7 @@
                 outline: 0;
 
                 font-weight: bold;
-                font-size: x-large;
-                padding: 0.5em;
+                font-size: xx-large;
             }
 
             input::selection {
@@ -54,8 +54,6 @@
         }
 
         div:nth-child(2) {
-            //background-color: aqua;
-
             justify-content: end;
 
             font-weight: 1000;
@@ -67,11 +65,10 @@
         display: flex;
         flex-direction: row;
 
-        height: 80%;
+        flex-grow: 1;
 
-        //flex-grow: 1;
-
-        overflow: auto;
+        margin: 0;
+        padding: 0;
 
         button {
             flex-grow: 1;
@@ -79,9 +76,11 @@
             font-weight: 1000;
             font-size: xx-large;
             width: 100%;
+            height: 100%;
 
             margin: 0;
             padding: 0;
+            gap: 0;
             background-color: #1378c0;
         }
 
@@ -89,8 +88,11 @@
             display: flex;
             flex-direction: column;
 
-            width: 100%;
-            max-width: fit-content;
+            width: fit-content;
+            height: 100%;
+
+            margin: 0;
+            padding: 0;
 
             button {
                 background-color: rgb(5, 72, 120);
@@ -105,22 +107,16 @@
             display: flex;
             flex-wrap: nowrap;
             flex-direction: column;
-            justify-content: stretch;
-            align-items: stretch;
 
             height: 100%;
             width: 100%;
 
-            #brackets {
-                width: 100%;
-                background-color: aqua;
-
-                display: flex;
-                flex-direction: row;
+            #clear_button {
+                //background-color: #46b8ff;
             }
 
-            #clear-button {
-                background-color: rgb(5, 72, 120);
+            #result_button {
+                //background-color: #46b8ff;
             }
 
             .one-row {
@@ -128,7 +124,7 @@
                 align-items: stretch;
                 justify-content: space-between;
 
-                flex-grow: 1;
+                height: 100%;
             }
         }
     }

@@ -2,6 +2,8 @@ import { evaluate } from 'mathjs';
 import './App.scss';
 import Button from '@mui/material/Button';
 import { useEffect } from 'react';
+import BackspaceIcon from '@mui/icons-material/Backspace';
+import IconButton from '@mui/material/IconButton';
 
 export default function App() {
 
@@ -72,19 +74,17 @@ export default function App() {
                     <Button variant='contained' size="large">&nbsp;&divide;&nbsp;</Button>
                     <Button variant='contained' size="large">&nbsp;&times;&nbsp;</Button>
                     <Button variant='contained' size="large">&nbsp;&minus;&nbsp;</Button>
-                    <Button variant='contained' size="large">&nbsp;&#43;&nbsp;</Button>
+                    <Button variant='contained' size="large">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#43;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</Button>
 
-                    <Button id='result_button' variant='contained' size="large">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</Button>
+                    {
+                        //                    <Button variant='contained' size="large">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</Button>
+                    }
                 </div>
                 <div id='symbols-and-digits-wrapper'>
                     <div className='one-row'>
-                        {
-                            /*
-                            <Button variant='contained' size="large" >(</Button>
-                            <Button variant='contained' size="large" >)</Button>
-                            */
-                        }
-                        <Button variant='contained' size="large" id='clear_button'>&#x232B;</Button>
+                        <Button variant='contained' size="large" id='clear_button'>
+                            &nbsp;<BackspaceIcon />&nbsp;
+                        </Button>
                     </div>
 
                     <div className='one-row'>
@@ -108,7 +108,7 @@ export default function App() {
                     <div className='one-row'>
                         <Button variant='contained' size="large" >.</Button>
                         <Button variant='contained' size="large" >0</Button>
-                        <Button variant='contained' size="large" >%</Button>
+                        <Button id='result_button' variant='contained' size="large">=</Button>
                     </div>
                 </div>
 
