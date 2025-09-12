@@ -1,3 +1,15 @@
+::-webkit-input-placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+::-moz-placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+::-ms-input-placeholder {
+    color: rgba(0, 0, 0, 0.5);
+}
+
 #app-wrapper {
     background-color: #46b8ff;
 
@@ -19,10 +31,10 @@
 
         justify-content: space-between;
 
-        height: 20%;
+        height: 25%;
         min-height: 2cm;
 
-        padding: 0.5em;
+        padding: 1em;
 
         div {
             display: flex;
