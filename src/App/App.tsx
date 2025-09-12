@@ -71,14 +71,10 @@ export default function App() {
             </div>
             <div id='down-section-wrapper'>
                 <div id='side-operations'>
-                    <Button variant='contained' size="large">&nbsp;&divide;&nbsp;</Button>
-                    <Button variant='contained' size="large">&nbsp;&times;&nbsp;</Button>
-                    <Button variant='contained' size="large">&nbsp;&minus;&nbsp;</Button>
-                    <Button variant='contained' size="large">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#43;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</Button>
-
-                    {
-                        //                    <Button variant='contained' size="large">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;%&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</Button>
-                    }
+                    <Button variant='contained' size="large">&divide;</Button>
+                    <Button variant='contained' size="large">&times;</Button>
+                    <Button variant='contained' size="large">&minus;</Button>
+                    <Button variant='contained' size="large">&#43;</Button>
                 </div>
                 <div id='symbols-and-digits-wrapper'>
                     <div className='one-row'>
