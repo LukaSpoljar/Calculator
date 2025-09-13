@@ -22,11 +22,16 @@ export default function App() {
 
         const calculate = (vibrationTime = 100) => {
             if (userInput) {
+
                 let inputValue = (userInput as HTMLInputElement).value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
                     let result = evaluate(inputValue);
-                    if (Number(result) || result == 0) {
-                        (resultText as HTMLParagraphElement).innerText = result;
+                    if (result = Number(result) || result == 0) {
+
+                        let positiveOrNegativeSymbol = result < 0 ? '−' : '';
+                        result = Math.abs(result);
+
+                        (resultText as HTMLParagraphElement).innerText = positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString();
                         vibrateDevice(vibrationTime);
                         return 1;
                     }
@@ -130,7 +135,8 @@ export default function App() {
                     });
 
                     resultButton?.addEventListener('click', (event: any) => {
-                        calculate();
+                        if (pointerIsDown == false)
+                            calculate();
                     });
 
                 } else {
@@ -140,6 +146,8 @@ export default function App() {
 
                     // Math Operations when pressed for longer time
                     if (buttonSymbol == '×' || buttonSymbol == '+' || buttonSymbol == '−' || buttonSymbol == '÷') {
+
+                        //buttonSymbol = " " + buttonSymbol + " ";
 
                         let startTime = 0;
                         const timeLimitMS = 200;
@@ -151,17 +159,17 @@ export default function App() {
                         htmlElement?.addEventListener('pointerup', (event: any) => {
                             const wrtittenResultText = (resultText as HTMLParagraphElement).textContent;
 
-                            if ((Date.now() - startTime) <= 600 || !Number(wrtittenResultText)) (userInput as HTMLInputElement).value += buttonSymbol;
+                            if ((Date.now() - startTime) <= 600 || !isNaN(Number(wrtittenResultText))) { (userInput as HTMLInputElement).value += buttonSymbol; }
                             else { (userInput as HTMLInputElement).value = wrtittenResultText + buttonSymbol; vibrateDevice(200) }
                             userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
 
-                            setTimeout(() => pointerIsDown = false, timeLimitMS)
+                            setTimeout(() => pointerIsDown = false, timeLimitMS);
                         });
                         htmlElement?.addEventListener('pointercancel', (event: any) => {
                             const wrtittenResultText = (resultText as HTMLParagraphElement).textContent;
 
-                            if ((Date.now() - startTime) <= 600 || !Number(wrtittenResultText)) (userInput as HTMLInputElement).value += buttonSymbol;
+                            if ((Date.now() - startTime) <= 600 || !isNaN(Number(wrtittenResultText))) (userInput as HTMLInputElement).value += buttonSymbol;
                             else (userInput as HTMLInputElement).value = wrtittenResultText + buttonSymbol;
                             userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
