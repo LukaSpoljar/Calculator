@@ -1,15 +1,15 @@
-import { evaluate } from 'mathjs';
+import { evaluate, isNaN } from 'mathjs';
 import './App.scss';
 import Button from '@mui/material/Button';
 import { useEffect } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
+
 
 export default function App() {
 
     function vibrateDevice(time: number) {
         if ('vibrate' in navigator) navigator.vibrate(time);
     }
-
 
     useEffect(() => {
 
@@ -20,24 +20,25 @@ export default function App() {
         let clearButton = document.getElementById('clear_button');
         let resultButton = document.getElementById('result_button');
 
-        const calculate = (vibrationTime = 100) => {
+        const calculate = () => {
             if (userInput) {
 
                 let inputValue = (userInput as HTMLInputElement).value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
                     let result = evaluate(inputValue);
-                    if (result = Number(result) || result == 0) {
+                    if (result == Number(result) || result == 0) {
 
                         let positiveOrNegativeSymbol = result < 0 ? '−' : '';
                         result = Math.abs(result);
 
-                        (resultText as HTMLParagraphElement).innerText = positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString();
-                        vibrateDevice(vibrationTime);
-                        return 1;
+                        (resultText as HTMLParagraphElement).textContent = positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString();
+                        return (positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
+                    } else {
+                        return null;
                     }
                 } catch (error: any) {
-                    (resultText as HTMLParagraphElement).innerText = (userInput as HTMLInputElement).value == '' ? '' : 'error'.toUpperCase();
-                    return 0;
+                    (resultText as HTMLParagraphElement).textContent = (userInput as HTMLInputElement).value == '' ? '' : 'error'.toUpperCase();
+                    return null;
                 }
             }
         }
@@ -68,12 +69,11 @@ export default function App() {
 
                         const repeatFn = () => {
                             let timeDifference = Date.now() - startTime;
-                            if (timeDifference <= 1200) (userInput as HTMLInputElement).value = (userInput as HTMLInputElement).value.toString().slice(0, -1);
-                            else if (timeDifference <= 2000) (userInput as HTMLInputElement).value = (userInput as HTMLInputElement).value.toString().slice(0, -2);
-                            else {
-                                let stringValue = (userInput as HTMLInputElement).value.toString();
-                                (userInput as HTMLInputElement).value = stringValue.slice(0, -stringValue.length);
-                            }
+                            let inputValue = (userInput as HTMLInputElement).value.toString();
+
+                            if (timeDifference <= 1200) (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                            else if (timeDifference <= 2000) (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
+                            else (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
                         }
                         intervalID = window.setInterval(repeatFn, timeLimitMs);
                     });
@@ -89,107 +89,82 @@ export default function App() {
                     });
                     clearButton?.addEventListener('click', () => {
                         if (pointerIsDown == false) {
+
+                            let inputValue = (userInput as HTMLInputElement).value.toString();
                             userInput?.focus();
-                            (userInput as HTMLInputElement).value = (userInput as HTMLInputElement).value.toString().slice(0, -1);
+                            (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
                         }
                     });
                 }
                 else if (htmlElement == resultButton) {
-
                     //When result button clicked or pressed for longer time
 
-                    let startTime = 0;
-                    let pointerIsDown = false;
-                    const timeLimitMS = 200;
+                    if (window.PointerEvent) {
+                        resultButton?.addEventListener('pointerup', (event: any) => {
+                            let resultTextText = document.getElementById("result_text")?.innerText;
+                            let userInputText = (userInput as HTMLInputElement).value.toString();
 
-                    resultButton?.addEventListener('pointerdown', (event: any) => {
-                        pointerIsDown = true;
-                        startTime = Date.now();
-                    });
+                            if (resultTextText && userInputText && resultTextText != userInputText && Number(resultTextText.replaceAll('−', '-'))) { (userInput as HTMLInputElement).value = resultTextText; vibrateDevice(1200) }
+                            else { calculate(); vibrateDevice(700) }
 
-                    resultButton?.addEventListener('pointerup', (event: any) => {
-                        const wrtittenResultText = (resultText as HTMLParagraphElement).textContent;
-
-                        if (calculate(0) && pointerIsDown) {
-                            if ((Date.now() - startTime) >= 1200 && (userInput as HTMLInputElement).value != wrtittenResultText) {
-                                (userInput as HTMLInputElement).value = (resultText as HTMLParagraphElement).innerText;
-                                vibrateDevice(300);
-                            }
-                        }
-
-                        userInput?.focus();
-                        setTimeout(() => pointerIsDown = false, timeLimitMS)
-                    });
-
-                    resultButton?.addEventListener('pointercancel', (event: any) => {
-                        const wrtittenResultText = (resultText as HTMLParagraphElement).textContent;
-
-                        if (calculate() && pointerIsDown) {
-                            if ((Date.now() - startTime) >= 1200 && (userInput as HTMLInputElement).value != wrtittenResultText) {
-                                (userInput as HTMLInputElement).value = (resultText as HTMLParagraphElement).innerText;
-                            }
-                        }
-
-                        userInput?.focus();
-                        setTimeout(() => pointerIsDown = false, timeLimitMS)
-                    });
-
-                    resultButton?.addEventListener('click', (event: any) => {
-                        if (pointerIsDown == false)
-                            calculate();
-                    });
-
+                            userInput?.focus();
+                        });
+                        resultButton?.addEventListener('pointercancel', (event: any) => { userInput?.focus(); });
+                    }
+                    else {
+                        resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(700); });
+                    }
+                    
                 } else {
 
+                    //Other buttons including buttons when clicked
                     let buttonSymbol = htmlElement.textContent;
-                    let pointerIsDown = false;
 
-                    // Math Operations when pressed for longer time
-                    if (buttonSymbol == '×' || buttonSymbol == '+' || buttonSymbol == '−' || buttonSymbol == '÷') {
+                    if (window.PointerEvent) {
 
-                        //buttonSymbol = " " + buttonSymbol + " ";
-
-                        let startTime = 0;
-                        const timeLimitMS = 200;
-
-                        htmlElement?.addEventListener('pointerdown', (event: any) => {
-                            pointerIsDown = true;
-                            startTime = Date.now();
-                        });
                         htmlElement?.addEventListener('pointerup', (event: any) => {
-                            const wrtittenResultText = (resultText as HTMLParagraphElement).textContent;
-
-                            if ((Date.now() - startTime) <= 600 || !isNaN(Number(wrtittenResultText))) { (userInput as HTMLInputElement).value += buttonSymbol; }
-                            else { (userInput as HTMLInputElement).value = wrtittenResultText + buttonSymbol; vibrateDevice(200) }
-                            userInput?.focus();
-                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-
-                            setTimeout(() => pointerIsDown = false, timeLimitMS);
-                        });
-                        htmlElement?.addEventListener('pointercancel', (event: any) => {
-                            const wrtittenResultText = (resultText as HTMLParagraphElement).textContent;
-
-                            if ((Date.now() - startTime) <= 600 || !isNaN(Number(wrtittenResultText))) (userInput as HTMLInputElement).value += buttonSymbol;
-                            else (userInput as HTMLInputElement).value = wrtittenResultText + buttonSymbol;
-                            userInput?.focus();
-                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-
-                            setTimeout(() => pointerIsDown = false, timeLimitMS)
-                        });
-                    }
-
-                    //Other buttons including buttons for math operations when only click triggers
-                    htmlElement.addEventListener('click', (event: any) => {
-                        if (pointerIsDown == false) {
-
-                            vibrateDevice(100);
-
+                            vibrateDevice(500);
                             userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             (userInput as HTMLInputElement).value += buttonSymbol;
-                        }
-                    });
-                }
+                        });
+
+                        htmlElement?.addEventListener('pointercancel', (event: any) => {
+                            vibrateDevice(500);
+                            userInput?.focus();
+                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+                            (userInput as HTMLInputElement).value += buttonSymbol;
+                        });
+                    } else {
+
+                        htmlElement.addEventListener('click', (event: any) => {
+                            vibrateDevice(500);
+                            userInput?.focus();
+                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+                            (userInput as HTMLInputElement).value += buttonSymbol;
+                        });
+                    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                };
             });
         }
     }, [])
@@ -212,6 +187,7 @@ export default function App() {
                     <Button variant='contained' size="large">&minus;</Button>
                     <Button variant='contained' size="large">&divide;</Button>
                 </div>
+
                 <div id='symbols-and-digits-wrapper'>
                     <div className='one-row'>
                         <Button variant='contained' size="large" id='clear_button'>
@@ -244,6 +220,9 @@ export default function App() {
                     </div>
                 </div>
             </div>
+
+
+
         </div>
     )
 }
