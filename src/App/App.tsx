@@ -21,13 +21,6 @@ export default function App() {
         let clearButton = document.getElementById('clear_button');
         let resultButton = document.getElementById('result_button');
 
-        document.addEventListener('touchmove', (event: any) => {
-            console.dir(event)
-            if (event.scale !== 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
-
         const calculate = () => {
             if (userInput) {
                 let inputValue = (userInput as HTMLInputElement).value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
@@ -124,26 +117,26 @@ export default function App() {
                             if (mathOperations.includes(buttonSymbol)) {
                                 vibrateDevice(500);
                             }
-                            userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             (userInput as HTMLInputElement).value += buttonSymbol;
+                            userInput?.focus();
                         });
                         htmlElement?.addEventListener('pointercancel', (event: any) => {
                             if (mathOperations.includes(buttonSymbol)) {
                                 vibrateDevice(500);
                             }
-                            userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             (userInput as HTMLInputElement).value += buttonSymbol;
+                            userInput?.focus();
                         });
                     } else {
                         htmlElement.addEventListener('click', (event: any) => {
                             if (mathOperations.includes(buttonSymbol)) {
                                 vibrateDevice(500);
                             }
-                            userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             (userInput as HTMLInputElement).value += buttonSymbol;
+                            userInput?.focus();
                         });
                     }
                 };
