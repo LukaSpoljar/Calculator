@@ -8,6 +8,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
   background-color: #46b8ff;
+  touch-action: manipulation;
 }
 
 code {
@@ -23,4 +24,27 @@ html,
 body,
 #root {
   height: 100%;
+
+  /* Target the scrollbar */
+  ::-webkit-scrollbar {
+    width: min-content;
+  //  background: rgba(19, 120, 192, 0.8);
+  }
+
+  /* Track (background) */
+  ::-webkit-scrollbar-track {
+    //border-radius: 10px;
+  }
+
+  /* Handle (thumb) */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 10px 0 0 10px;
+    background: #7bcdff;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
+    background: rgb(5, 72, 120);
+  }
 }

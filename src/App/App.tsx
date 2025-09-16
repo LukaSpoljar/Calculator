@@ -8,8 +8,9 @@ import BackspaceIcon from '@mui/icons-material/Backspace';
 export default function App() {
 
     function vibrateDevice(time: number) {
-        if ('vibrate' in navigator) navigator.vibrate(time);
+        if ('vibrate' in window.navigator) window.navigator.vibrate(time);
     }
+    const mathOperations = ['×', '+', '−', '÷'];
 
     useEffect(() => {
 
@@ -20,9 +21,15 @@ export default function App() {
         let clearButton = document.getElementById('clear_button');
         let resultButton = document.getElementById('result_button');
 
+        document.addEventListener('touchmove', (event: any) => {
+            console.dir(event)
+            if (event.scale !== 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
         const calculate = () => {
             if (userInput) {
-
                 let inputValue = (userInput as HTMLInputElement).value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
                     let result = evaluate(inputValue);
@@ -56,49 +63,42 @@ export default function App() {
             document.querySelectorAll('#down-section-wrapper button').forEach((htmlElement: any, index: number) => {
 
                 if (htmlElement == clearButton) {
-
                     //Pointer on CLEAR BUTTON (when deleting)
-                    let intervalID = 0;
-                    let pointerIsDown = false;
-                    const timeLimitMs = 200;
+                    if (window.PointerEvent) {
+                        let intervalID = 0;
+                        const timeLimitMs = 200;
+                        clearButton?.addEventListener('pointerdown', (event: any) => {
+                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+                            let startTime = Date.now();
 
-                    clearButton?.addEventListener('pointerdown', (event: any) => {
-                        pointerIsDown = true;
-                        (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                        let startTime = Date.now();
+                            const repeatFn = () => {
+                                let timeDifference = Date.now() - startTime;
+                                let inputValue = (userInput as HTMLInputElement).value.toString();
 
-                        const repeatFn = () => {
-                            let timeDifference = Date.now() - startTime;
-                            let inputValue = (userInput as HTMLInputElement).value.toString();
-
-                            if (timeDifference <= 1200) (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
-                            else if (timeDifference <= 2000) (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
-                            else (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
-                        }
-                        intervalID = window.setInterval(repeatFn, timeLimitMs);
-                    });
-                    clearButton?.addEventListener('pointerup', () => {
-                        pointerIsDown = false
-                        clearInterval(intervalID);
-                        setTimeout(() => { userInput?.focus(); }, timeLimitMs);
-                    });
-                    clearButton?.addEventListener('pointercancel', () => {
-                        pointerIsDown = false
-                        clearInterval(intervalID);
-                        setTimeout(() => { userInput?.focus(); }, timeLimitMs);
-                    });
-                    clearButton?.addEventListener('click', () => {
-                        if (pointerIsDown == false) {
-
+                                if (timeDifference <= 1200) (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                                else if (timeDifference <= 2000) (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
+                                else (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
+                            }
+                            intervalID = window.setInterval(repeatFn, timeLimitMs);
+                        });
+                        clearButton?.addEventListener('pointerup', () => {
+                            vibrateDevice(500);
+                            setTimeout(() => { userInput?.focus(); clearInterval(intervalID); }, timeLimitMs);
+                        });
+                        clearButton?.addEventListener('pointercancel', () => {
+                            setTimeout(() => { userInput?.focus(); clearInterval(intervalID); }, timeLimitMs);
+                        });
+                    } else {
+                        clearButton?.addEventListener('click', (event: any) => {
                             let inputValue = (userInput as HTMLInputElement).value.toString();
                             userInput?.focus();
+                            vibrateDevice(500);
                             (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
-                        }
-                    });
+                        });
+                    }
                 }
                 else if (htmlElement == resultButton) {
                     //When result button clicked or pressed for longer time
-
                     if (window.PointerEvent) {
                         resultButton?.addEventListener('pointerup', (event: any) => {
                             let resultTextText = document.getElementById("result_text")?.innerText;
@@ -114,56 +114,38 @@ export default function App() {
                     else {
                         resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(700); });
                     }
-                    
                 } else {
 
                     //Other buttons including buttons when clicked
                     let buttonSymbol = htmlElement.textContent;
 
                     if (window.PointerEvent) {
-
                         htmlElement?.addEventListener('pointerup', (event: any) => {
-                            vibrateDevice(500);
+                            if (mathOperations.includes(buttonSymbol)) {
+                                vibrateDevice(500);
+                            }
                             userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             (userInput as HTMLInputElement).value += buttonSymbol;
                         });
-
                         htmlElement?.addEventListener('pointercancel', (event: any) => {
-                            vibrateDevice(500);
+                            if (mathOperations.includes(buttonSymbol)) {
+                                vibrateDevice(500);
+                            }
                             userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             (userInput as HTMLInputElement).value += buttonSymbol;
                         });
                     } else {
-
                         htmlElement.addEventListener('click', (event: any) => {
-                            vibrateDevice(500);
+                            if (mathOperations.includes(buttonSymbol)) {
+                                vibrateDevice(500);
+                            }
                             userInput?.focus();
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             (userInput as HTMLInputElement).value += buttonSymbol;
                         });
                     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 };
             });
         }
@@ -220,9 +202,6 @@ export default function App() {
                     </div>
                 </div>
             </div>
-
-
-
         </div>
     )
 }
