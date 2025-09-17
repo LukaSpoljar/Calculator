@@ -3,7 +3,6 @@ import './App.scss';
 import Button from '@mui/material/Button';
 import { useEffect } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
-import { setTimeout } from 'timers/promises';
 
 export default function App() {
 
@@ -77,7 +76,7 @@ export default function App() {
                                     vibrateDevice(300);
                                 }
                             }
-                            intervalID = window.setInterval(repeatFn, 100);
+                            intervalID = window.setInterval(repeatFn, 300);
                         });
                         clearButton?.addEventListener('pointerup', () => {
                             clearInterval(intervalID);
@@ -109,32 +108,47 @@ export default function App() {
                     let shortOne: boolean = true;
 
                     if (window.PointerEvent) {
+
+                        let previousResultText: any = '';
+
                         resultButton?.addEventListener('pointerdown', (event: any) => {
+                            calculate();
                             let startTime = Date.now();
 
-                            const repeatFn = () => {
-                                let resultTextText = document.getElementById("result_text")?.innerText;
-                                let userInputText = (userInput as HTMLInputElement).value.toString();
+                            if (previousResultText == document.getElementById("result_text")?.innerText) {
+                                (userInput as HTMLInputElement).value = previousResultText;
+                            } else {
+                                const repeatFn = () => {
+                                    let resultTextText = document.getElementById("result_text")?.innerText;
+                                    let userInputText = (userInput as HTMLInputElement).value.toString();
 
-                                let timeDifference = Date.now() - startTime;
+                                    let timeDifference = Date.now() - startTime;
 
-                                if (timeDifference > 1000 && resultTextText && userInputText && resultTextText != userInputText && Number(resultTextText.replaceAll('−', '-'))) {
-                                    shortOne = false;
-                                    (userInput as HTMLInputElement).value = resultTextText; vibrateDevice(200);
-                                    calculate();
+                                    if (timeDifference > 1000 && resultTextText != userInputText && Number(resultTextText?.replaceAll('−', '-'))) {
+                                        shortOne = false;
+                                        (userInput as HTMLInputElement).value = resultTextText as string;
+                                        vibrateDevice(200);
+                                        clearInterval(intervalID);
+                                    }
                                 }
+                                intervalID = window.setInterval(repeatFn, 300);
                             }
-                            intervalID = window.setInterval(repeatFn, 100);
                         });
                         resultButton?.addEventListener('pointerup', (event: any) => {
-                            if (shortOne) { calculate(); vibrateDevice(100); }
+                            if (shortOne) {
+                                vibrateDevice(100);
+                                clearInterval(intervalID);
+                            }
+                            previousResultText = document.getElementById("result_text")?.innerText;
                             shortOne = true;
-                            clearInterval(intervalID);
                             userInput?.focus();
                         });
                         resultButton?.addEventListener('pointercancel', (event: any) => { clearInterval(intervalID); userInput?.focus(); });
                     }
-                    else resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(100); });
+                    else resultButton?.addEventListener('click', (event: any) => {
+                        calculate();
+                        vibrateDevice(100);
+                    });
                 } else {
                     //Other buttons including math operation buttons
                     let buttonSymbol = htmlElement.textContent;
