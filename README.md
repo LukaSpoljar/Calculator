@@ -1,4 +1,5 @@
-<img width="1024" height="1536" alt="calculator" src="https://github.com/user-attachments/assets/0fba607a-0a51-47ee-ab5c-5ab8f82fd0b4" />
+<img width="612" height="863" alt="Screenshot 2025-09-17 at 15 41 11" src="https://github.com/user-attachments/assets/8e1875c8-aa26-47c1-ac5f-0257faeaa945" />
+
 
 # Getting Started with Create React App
 
