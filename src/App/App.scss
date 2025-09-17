@@ -57,10 +57,12 @@
                 border: 0 solid black;
 
                 font-weight: bold;
+
+                overflow-x: scroll;
             }
 
             input::selection {
-                background-color: rgba(0, 0, 0, 0.3);
+                background-color: rgba(0, 0, 0, 0.5);
             }
         }
 
@@ -88,7 +90,7 @@
                     font-size: 1cm;
                 }
                 @media (min-height: 20cm) {
-                    font-size: 1.5cm;
+                    font-size: 1.3cm;
                 }
                 @media (min-height: 30cm) {
                     font-size: 3cm;

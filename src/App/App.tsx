@@ -72,6 +72,7 @@ export default function App() {
                                 else if (timeDifference > 2000) {
                                     onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
+                                    clearInterval(intervalID);
                                 }
                             }
                             intervalID = window.setInterval(repeatFn, 300);
