@@ -53,10 +53,8 @@ export default function App() {
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
                         let intervalID: any = undefined;
-                        let onlyOnce = true;
 
                         clearButton?.addEventListener('pointerdown', (event: any) => {
-                            clearInterval(intervalID);
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             let startTime = Date.now();
 
@@ -64,23 +62,23 @@ export default function App() {
                                 let timeDifference = Date.now() - startTime;
                                 let inputValue = (userInput as HTMLInputElement).value.toString();
 
-                                onlyOnce = false;
-
-                                if (timeDifference <= 1000) onlyOnce = true;
-                                else if (timeDifference <= 2000) (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
-                                else (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
+                                if (timeDifference <= 1000) {
+                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                                    vibrateDevice(100);
+                                }
+                                else if (timeDifference <= 2000) {
+                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
+                                    vibrateDevice(200);
+                                }
+                                else {
+                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
+                                    vibrateDevice(300);
+                                }
                             }
-
                             intervalID = window.setInterval(repeatFn, 100);
                         });
                         clearButton?.addEventListener('pointerup', () => {
                             clearInterval(intervalID);
-                            if (onlyOnce) {
-                                let inputValue = (userInput as HTMLInputElement).value.toString();
-                                (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
-                            }
-                            onlyOnce = true;
-                            vibrateDevice(500);
                             userInput?.focus();
                         });
                         clearButton?.addEventListener('pointercancel', () => {
@@ -92,7 +90,7 @@ export default function App() {
                             let inputValue = (userInput as HTMLInputElement).value.toString();
                             (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
                             userInput?.focus();
-                            vibrateDevice(500);
+                            vibrateDevice(100);
                         });
                     }
                 }
@@ -103,21 +101,21 @@ export default function App() {
                             let resultTextText = document.getElementById("result_text")?.innerText;
                             let userInputText = (userInput as HTMLInputElement).value.toString();
 
-                            if (resultTextText && userInputText && resultTextText != userInputText && Number(resultTextText.replaceAll('−', '-'))) { (userInput as HTMLInputElement).value = resultTextText; vibrateDevice(1200) }
-                            else { calculate(); vibrateDevice(700) }
+                            if (resultTextText && userInputText && resultTextText != userInputText && Number(resultTextText.replaceAll('−', '-'))) { (userInput as HTMLInputElement).value = resultTextText; vibrateDevice(200) }
+                            else { calculate(); vibrateDevice(100) }
 
                             userInput?.focus();
                         });
                         resultButton?.addEventListener('pointercancel', (event: any) => { userInput?.focus(); });
                     }
-                    else resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(700); });
+                    else resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(100); });
 
                 } else {
                     //Other buttons including math operation buttons
                     let buttonSymbol = htmlElement.textContent;
                     htmlElement.addEventListener('click', (event: any) => {
                         if (mathOperations.includes(buttonSymbol)) {
-                            vibrateDevice(500);
+                            vibrateDevice(100);
                         }
                         (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                         (userInput as HTMLInputElement).value += buttonSymbol;
@@ -132,14 +130,17 @@ export default function App() {
     return (
         <div id='app-wrapper'>
             <div id='up-section-wrapper'>
+
                 <div>
                     <input id='user_input' placeholder='0' autoFocus type='text' inputMode='none' />
                 </div>
                 <div>
                     <p id='result_text'>&nbsp;</p>
                 </div>
+            
             </div>
             <div id='down-section-wrapper'>
+
                 <div id='side-operations'>
                     <Button variant='contained' size="large">&times;</Button>
                     <Button variant='contained' size="large">&#43;</Button>
@@ -148,6 +149,7 @@ export default function App() {
                 </div>
 
                 <div id='symbols-and-digits-wrapper'>
+                    
                     <div className='one-row'>
                         <Button variant='contained' size="large" id='clear_button'>
                             &nbsp;<BackspaceIcon />&nbsp;

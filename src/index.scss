@@ -9,6 +9,7 @@ body {
 
   background-color: #46b8ff;
   touch-action: manipulation;
+  overflow: hidden;
 }
 
 code {
@@ -24,21 +25,22 @@ html,
 body,
 #root {
   height: 100%;
+}
 
+#root {
   /* Target the scrollbar */
   ::-webkit-scrollbar {
     width: min-content;
-  //  background: rgba(19, 120, 192, 0.8);
+    //  background: rgba(19, 120, 192, 0.8);
   }
 
   /* Track (background) */
   ::-webkit-scrollbar-track {
-    //border-radius: 10px;
+    border-radius: 10px;
   }
 
   /* Handle (thumb) */
   ::-webkit-scrollbar-thumb {
-    border-radius: 10px 0 0 10px;
     background: #7bcdff;
   }
 
