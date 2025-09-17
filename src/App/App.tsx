@@ -68,12 +68,10 @@ export default function App() {
                                 if (timeDifference <= 2000) {
                                     onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
-                                    vibrateDevice(200);
                                 }
                                 else if (timeDifference > 2000) {
                                     onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
-                                    vibrateDevice(300);
                                 }
                             }
                             intervalID = window.setInterval(repeatFn, 300);
@@ -84,7 +82,7 @@ export default function App() {
                                 let inputValue = (userInput as HTMLInputElement).value.toString();
                                 (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
                                 vibrateDevice(100);
-                            }
+                            } else vibrateDevice(200);
                             onlyOnce = true;
                             userInput?.focus();
                         });
