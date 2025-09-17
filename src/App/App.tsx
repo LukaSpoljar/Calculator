@@ -53,6 +53,7 @@ export default function App() {
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
                         let intervalID: any = undefined;
+                        let onlyOnce: boolean = true;
 
                         clearButton?.addEventListener('pointerdown', (event: any) => {
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
@@ -62,27 +63,36 @@ export default function App() {
                                 let timeDifference = Date.now() - startTime;
                                 let inputValue = (userInput as HTMLInputElement).value.toString();
 
-                                if (timeDifference <= 1000) {
-                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
-                                    vibrateDevice(100);
-                                }
-                                else if (timeDifference <= 2000) {
+                                onlyOnce = true;
+
+                                if (timeDifference <= 2000) {
+                                    onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
                                     vibrateDevice(200);
+                                    clearInterval(intervalID);
                                 }
                                 else {
+                                    onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
                                     vibrateDevice(300);
+                                    clearInterval(intervalID);
                                 }
                             }
                             intervalID = window.setInterval(repeatFn, 100);
                         });
                         clearButton?.addEventListener('pointerup', () => {
                             clearInterval(intervalID);
+                            if (onlyOnce) {
+                                let inputValue = (userInput as HTMLInputElement).value.toString();
+                                (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                                vibrateDevice(100);
+                            }
+                            onlyOnce = true;
                             userInput?.focus();
                         });
                         clearButton?.addEventListener('pointercancel', () => {
                             clearInterval(intervalID);
+                            onlyOnce = true;
                             userInput?.focus();
                         });
                     } else {
@@ -137,7 +147,7 @@ export default function App() {
                 <div>
                     <p id='result_text'>&nbsp;</p>
                 </div>
-            
+
             </div>
             <div id='down-section-wrapper'>
 
@@ -149,7 +159,7 @@ export default function App() {
                 </div>
 
                 <div id='symbols-and-digits-wrapper'>
-                    
+
                     <div className='one-row'>
                         <Button variant='contained' size="large" id='clear_button'>
                             &nbsp;<BackspaceIcon />&nbsp;
