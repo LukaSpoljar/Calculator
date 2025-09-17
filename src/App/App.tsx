@@ -1,9 +1,8 @@
-import { evaluate, isNaN } from 'mathjs';
+import { evaluate } from 'mathjs';
 import './App.scss';
 import Button from '@mui/material/Button';
 import { useEffect } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
-
 
 export default function App() {
 
@@ -33,9 +32,7 @@ export default function App() {
 
                         (resultText as HTMLParagraphElement).textContent = positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString();
                         return (positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
-                    } else {
-                        return null;
-                    }
+                    } else return null;
                 } catch (error: any) {
                     (resultText as HTMLParagraphElement).textContent = (userInput as HTMLInputElement).value == '' ? '' : 'error'.toUpperCase();
                     return null;
@@ -47,20 +44,19 @@ export default function App() {
 
             userInput?.addEventListener('keydown', (event: any) => {
                 (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                if (event.key == 'Enter') {
-                    calculate();
-                }
+                if (event.key == 'Enter') { calculate(); }
             });
 
             //All numpad buttons -> symbols & digits
             document.querySelectorAll('#down-section-wrapper button').forEach((htmlElement: any, index: number) => {
-
                 if (htmlElement == clearButton) {
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
-                        let intervalID = 0;
-                        const timeLimitMs = 200;
+                        let intervalID: any = undefined;
+                        let onlyOnce = true;
+
                         clearButton?.addEventListener('pointerdown', (event: any) => {
+                            clearInterval(intervalID);
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             let startTime = Date.now();
 
@@ -68,25 +64,35 @@ export default function App() {
                                 let timeDifference = Date.now() - startTime;
                                 let inputValue = (userInput as HTMLInputElement).value.toString();
 
-                                if (timeDifference <= 1200) (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                                onlyOnce = false;
+
+                                if (timeDifference <= 1000) onlyOnce = true;
                                 else if (timeDifference <= 2000) (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
                                 else (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
                             }
-                            intervalID = window.setInterval(repeatFn, timeLimitMs);
+
+                            intervalID = window.setInterval(repeatFn, 100);
                         });
                         clearButton?.addEventListener('pointerup', () => {
+                            clearInterval(intervalID);
+                            if (onlyOnce) {
+                                let inputValue = (userInput as HTMLInputElement).value.toString();
+                                (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                            }
+                            onlyOnce = true;
                             vibrateDevice(500);
-                            setTimeout(() => { userInput?.focus(); clearInterval(intervalID); }, timeLimitMs);
+                            userInput?.focus();
                         });
                         clearButton?.addEventListener('pointercancel', () => {
-                            setTimeout(() => { userInput?.focus(); clearInterval(intervalID); }, timeLimitMs);
+                            clearInterval(intervalID);
+                            userInput?.focus();
                         });
                     } else {
                         clearButton?.addEventListener('click', (event: any) => {
                             let inputValue = (userInput as HTMLInputElement).value.toString();
+                            (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
                             userInput?.focus();
                             vibrateDevice(500);
-                            (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
                         });
                     }
                 }
@@ -104,41 +110,19 @@ export default function App() {
                         });
                         resultButton?.addEventListener('pointercancel', (event: any) => { userInput?.focus(); });
                     }
-                    else {
-                        resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(700); });
-                    }
+                    else resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(700); });
+
                 } else {
-
-                    //Other buttons including buttons when clicked
+                    //Other buttons including math operation buttons
                     let buttonSymbol = htmlElement.textContent;
-
-                    if (window.PointerEvent) {
-                        htmlElement?.addEventListener('pointerup', (event: any) => {
-                            if (mathOperations.includes(buttonSymbol)) {
-                                vibrateDevice(500);
-                            }
-                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                            (userInput as HTMLInputElement).value += buttonSymbol;
-                            userInput?.focus();
-                        });
-                        htmlElement?.addEventListener('pointercancel', (event: any) => {
-                            if (mathOperations.includes(buttonSymbol)) {
-                                vibrateDevice(500);
-                            }
-                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                            (userInput as HTMLInputElement).value += buttonSymbol;
-                            userInput?.focus();
-                        });
-                    } else {
-                        htmlElement.addEventListener('click', (event: any) => {
-                            if (mathOperations.includes(buttonSymbol)) {
-                                vibrateDevice(500);
-                            }
-                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                            (userInput as HTMLInputElement).value += buttonSymbol;
-                            userInput?.focus();
-                        });
-                    }
+                    htmlElement.addEventListener('click', (event: any) => {
+                        if (mathOperations.includes(buttonSymbol)) {
+                            vibrateDevice(500);
+                        }
+                        (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+                        (userInput as HTMLInputElement).value += buttonSymbol;
+                        userInput?.focus();
+                    });
                 };
             });
         }
