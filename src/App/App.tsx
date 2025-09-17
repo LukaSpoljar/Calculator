@@ -69,13 +69,11 @@ export default function App() {
                                     onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
                                     vibrateDevice(200);
-                                    clearInterval(intervalID);
                                 }
                                 else {
                                     onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
                                     vibrateDevice(300);
-                                    clearInterval(intervalID);
                                 }
                             }
                             intervalID = window.setInterval(repeatFn, 100);
