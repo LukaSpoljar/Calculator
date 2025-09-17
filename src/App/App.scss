@@ -93,15 +93,16 @@
         //margin: 1em;
 
         button {
-            flex-grow: 1;
             border-radius: 0;
             font-weight: 1000;
             font-size: xx-large;
+
             width: 100%;
             height: 100%;
 
             margin: 0;
             padding: 0;
+
             background-color: #1378c0;
         }
 
@@ -122,8 +123,6 @@
 
             flex-grow: 1;
 
-  
-
             button {
                 background-color: rgb(5, 72, 120);
                 flex-grow: 1;
@@ -138,7 +137,6 @@
             height: 100%;
             width: 100%;
 
-
             margin: 0;
             padding: 0;
 
@@ -152,7 +150,7 @@
 
             .one-row {
                 display: flex;
-                height: 100%;
+                flex-grow: 1;
             }
         }
     }
