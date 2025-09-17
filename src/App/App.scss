@@ -72,10 +72,27 @@
         input,
         div:nth-child(2) {
             @media (orientation: landscape) {
-                font-size: xx-large;
+                @media (min-width: 13cm) {
+                    font-size: xx-large;
+                }
+                @media (min-width: 30cm) {
+                    font-size: 2cm;
+                }
+                @media (min-width: 50cm) {
+                    font-size: 3cm;
+                }
             }
+
             @media (orientation: portrait) {
-                font-size: 3em;
+                @media (min-height: 10cm) {
+                    font-size: 1.5cm;
+                }
+                @media (min-height: 20cm) {
+                    font-size: 2cm;
+                }
+                @media (min-height: 30cm) {
+                    font-size: 3cm;
+                }
             }
         }
     }
