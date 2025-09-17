@@ -3,6 +3,7 @@ import './App.scss';
 import Button from '@mui/material/Button';
 import { useEffect } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
+import { setTimeout } from 'timers/promises';
 
 export default function App() {
 
@@ -104,20 +105,36 @@ export default function App() {
                 }
                 else if (htmlElement == resultButton) {
                     //When result button clicked or pressed for longer time
+                    let intervalID: any = undefined;
+                    let shortOne: boolean = true;
+
                     if (window.PointerEvent) {
+                        resultButton?.addEventListener('pointerdown', (event: any) => {
+                            let startTime = Date.now();
+
+                            const repeatFn = () => {
+                                let resultTextText = document.getElementById("result_text")?.innerText;
+                                let userInputText = (userInput as HTMLInputElement).value.toString();
+
+                                let timeDifference = Date.now() - startTime;
+
+                                if (timeDifference > 1000 && resultTextText && userInputText && resultTextText != userInputText && Number(resultTextText.replaceAll('−', '-'))) {
+                                    shortOne = false;
+                                    (userInput as HTMLInputElement).value = resultTextText; vibrateDevice(200);
+                                    calculate();
+                                }
+                            }
+                            intervalID = window.setInterval(repeatFn, 100);
+                        });
                         resultButton?.addEventListener('pointerup', (event: any) => {
-                            let resultTextText = document.getElementById("result_text")?.innerText;
-                            let userInputText = (userInput as HTMLInputElement).value.toString();
-
-                            if (resultTextText && userInputText && resultTextText != userInputText && Number(resultTextText.replaceAll('−', '-'))) { (userInput as HTMLInputElement).value = resultTextText; vibrateDevice(200) }
-                            else { calculate(); vibrateDevice(100) }
-
+                            if (shortOne) { calculate(); vibrateDevice(100); }
+                            shortOne = true;
+                            clearInterval(intervalID);
                             userInput?.focus();
                         });
-                        resultButton?.addEventListener('pointercancel', (event: any) => { userInput?.focus(); });
+                        resultButton?.addEventListener('pointercancel', (event: any) => { clearInterval(intervalID); userInput?.focus(); });
                     }
                     else resultButton?.addEventListener('click', (event: any) => { calculate(); vibrateDevice(100); });
-
                 } else {
                     //Other buttons including math operation buttons
                     let buttonSymbol = htmlElement.textContent;
