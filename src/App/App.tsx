@@ -70,7 +70,7 @@ export default function App() {
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
                                     vibrateDevice(200);
                                 }
-                                else {
+                                else if (timeDifference > 2000) {
                                     onlyOnce = false;
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
                                     vibrateDevice(300);
