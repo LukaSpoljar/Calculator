@@ -11,6 +11,9 @@ export default function App() {
     }
     const mathOperations = ['×', '+', '−', '÷'];
 
+    const shortVibationMs = 50;
+    const longerVibrrationMs = 150;
+
     useEffect(() => {
 
         let userInput = document.getElementById('user_input');
@@ -75,15 +78,15 @@ export default function App() {
                                     clearInterval(intervalID);
                                 }
                             }
-                            intervalID = window.setInterval(repeatFn, 300);
+                            intervalID = window.setInterval(repeatFn, shortVibationMs + longerVibrrationMs);
                         });
                         clearButton?.addEventListener('pointerup', () => {
                             clearInterval(intervalID);
                             if (onlyOnce) {
                                 let inputValue = (userInput as HTMLInputElement).value.toString();
                                 (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
-                                vibrateDevice(100);
-                            } else vibrateDevice(200);
+                                vibrateDevice(shortVibationMs);
+                            } else vibrateDevice(longerVibrrationMs);
                             onlyOnce = true;
                             userInput?.focus();
                         });
@@ -97,7 +100,7 @@ export default function App() {
                             let inputValue = (userInput as HTMLInputElement).value.toString();
                             (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
                             userInput?.focus();
-                            vibrateDevice(100);
+                            vibrateDevice(shortVibationMs);
                         });
                     }
                 }
@@ -123,22 +126,25 @@ export default function App() {
 
                                     let timeDifference = Date.now() - startTime;
 
-                                    if (timeDifference > 1000 && resultTextText != userInputText && Number(resultTextText?.replaceAll('−', '-'))) {
+                                    if (timeDifference > ((shortVibationMs + longerVibrrationMs) * 4) && resultTextText != userInputText && Number(resultTextText?.replaceAll('−', '-'))) {
                                         shortOne = false;
                                         (userInput as HTMLInputElement).value = resultTextText as string;
-                                        vibrateDevice(200);
+                                        vibrateDevice(longerVibrrationMs);
                                         clearInterval(intervalID);
                                     }
                                 }
-                                intervalID = window.setInterval(repeatFn, 300);
+                                intervalID = window.setInterval(repeatFn, shortVibationMs + longerVibrrationMs);
                             }
                         });
                         resultButton?.addEventListener('pointerup', (event: any) => {
                             if (shortOne) {
-                                vibrateDevice(100);
+                                vibrateDevice(shortVibationMs);
                                 clearInterval(intervalID);
                             }
-                            previousResultText = document.getElementById("result_text")?.innerText;
+
+                            let resultTextText = document.getElementById("result_text")?.innerText;
+                            previousResultText = Number(resultTextText?.replaceAll('−', '-')) ? resultTextText : null;
+
                             shortOne = true;
                             userInput?.focus();
                         });
@@ -153,7 +159,7 @@ export default function App() {
                     let buttonSymbol = htmlElement.textContent;
                     htmlElement.addEventListener('click', (event: any) => {
                         if (mathOperations.includes(buttonSymbol)) {
-                            vibrateDevice(100);
+                            vibrateDevice(shortVibationMs);
                         }
                         (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                         (userInput as HTMLInputElement).value += buttonSymbol;
