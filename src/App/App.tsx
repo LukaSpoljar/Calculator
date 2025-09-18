@@ -56,43 +56,46 @@ export default function App() {
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
                         let intervalID: any = undefined;
-                        let onlyOnce: boolean = true;
+                        let onlyOnceShort: boolean = true;
 
                         clearButton?.addEventListener('pointerdown', (event: any) => {
                             (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
                             let startTime = Date.now();
 
+                            let inputValue = (userInput as HTMLInputElement).value.toString();
+                            (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+
                             const repeatFn = () => {
                                 let timeDifference = Date.now() - startTime;
                                 let inputValue = (userInput as HTMLInputElement).value.toString();
 
-                                onlyOnce = true;
-
-                                if (timeDifference <= 2000) {
-                                    onlyOnce = false;
-                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -2);
-                                }
-                                else if (timeDifference > 2000) {
-                                    onlyOnce = false;
+                                if (timeDifference >= 2000) {
                                     (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
+                                    onlyOnceShort = false;
                                     clearInterval(intervalID);
                                 }
+                                else if (timeDifference >= 1500) {
+                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -2)
+                                    onlyOnceShort = false;
+                                }
+                                else {
+                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                                }
+
                             }
-                            intervalID = window.setInterval(repeatFn, shortVibationMs + longerVibrrationMs);
+                            intervalID = window.setInterval(repeatFn, (shortVibationMs + longerVibrrationMs));
                         });
                         clearButton?.addEventListener('pointerup', () => {
                             clearInterval(intervalID);
-                            if (onlyOnce) {
-                                let inputValue = (userInput as HTMLInputElement).value.toString();
-                                (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                            if (onlyOnceShort) {
                                 vibrateDevice(shortVibationMs);
                             } else vibrateDevice(longerVibrrationMs);
-                            onlyOnce = true;
+                            onlyOnceShort = true;
                             userInput?.focus();
                         });
                         clearButton?.addEventListener('pointercancel', () => {
                             clearInterval(intervalID);
-                            onlyOnce = true;
+                            onlyOnceShort = true;
                             userInput?.focus();
                         });
                     } else {
