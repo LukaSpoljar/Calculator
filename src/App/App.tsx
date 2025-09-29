@@ -3,6 +3,7 @@ import './App.scss';
 import Button from '@mui/material/Button';
 import { useEffect } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 export default function App() {
 
@@ -158,15 +159,22 @@ export default function App() {
                         vibrateDevice(100);
                     });
                 } else {
+
                     //Other buttons including math operation buttons
                     let buttonSymbol = htmlElement.textContent;
                     htmlElement.addEventListener('click', (event: any) => {
-                        if (mathOperations.includes(buttonSymbol)) {
-                            vibrateDevice(shortVibationMs);
+                        if (buttonSymbol.length > 0) {
+                            if (mathOperations.includes(buttonSymbol)) {
+                                vibrateDevice(shortVibationMs);
+                            }
+                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+                            (userInput as HTMLInputElement).value += buttonSymbol;
+                            userInput?.focus();
+                        } else {
+                            
+                            //Settings button
+                            console.log("Simbol je: [" + buttonSymbol + "]");
                         }
-                        (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                        (userInput as HTMLInputElement).value += buttonSymbol;
-                        userInput?.focus();
                     });
                 };
             });
@@ -177,14 +185,12 @@ export default function App() {
     return (
         <div id='app-wrapper'>
             <div id='up-section-wrapper'>
-
                 <div>
                     <input id='user_input' placeholder='0' autoFocus type='text' inputMode='none' />
                 </div>
                 <div>
                     <p id='result_text'>&nbsp;</p>
                 </div>
-
             </div>
             <div id='down-section-wrapper'>
 
@@ -193,6 +199,9 @@ export default function App() {
                     <Button variant='contained' size="large">&#43;</Button>
                     <Button variant='contained' size="large">&minus;</Button>
                     <Button variant='contained' size="large">&divide;</Button>
+                    <Button variant='contained' size="large">
+                        <SettingsIcon />
+                    </Button>
                 </div>
 
                 <div id='symbols-and-digits-wrapper'>
