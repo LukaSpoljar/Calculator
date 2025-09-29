@@ -17,7 +17,7 @@ export default function App() {
     const resultButtonRef = useRef<HTMLButtonElement>(null);
     const settingsButtonRef = useRef<any>(null);
 
-    let settingsDialog: any;
+    let settingsDialog: HTMLDialogElement;
 
     function vibrateDevice(time: number) {
         if ('vibrate' in window.navigator) window.navigator.vibrate(time);
@@ -29,14 +29,15 @@ export default function App() {
 
     useEffect(() => {
 
-        let userInput = userInputRef.current;
-        let resultText = resultTextRef.current;
+        let userInput = userInputRef.current as HTMLInputElement;
+        let resultText = resultTextRef.current as HTMLParagraphElement;
 
-        let buttonsPad = buttonsPadRef.current;
-        let clearButton = clearButtonRef.current;
-        let resultButton = resultButtonRef.current;
+        let buttonsPad = buttonsPadRef.current as HTMLDivElement;
+        let clearButton = clearButtonRef.current as HTMLButtonElement;
+        let resultButton = resultButtonRef.current as HTMLButtonElement;
 
-        let settingsButton = settingsButtonRef.current;
+        let settingsButton = settingsButtonRef.current as any;
+
 
         const calculate = () => {
             if (userInput && resultText) {
@@ -52,7 +53,7 @@ export default function App() {
                         return (positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
                     } else return null;
                 } catch (error: any) {
-                    resultText.textContent = (userInput as HTMLInputElement).value == '' ? '' : 'error'.toUpperCase();
+                    resultText.textContent = userInput.value == '' ? '' : 'error'.toUpperCase();
                     return null;
                 }
             }
@@ -60,70 +61,68 @@ export default function App() {
 
         if ((userInput && resultButton && clearButton && resultText && buttonsPad) instanceof HTMLElement) {
 
-            userInput?.addEventListener('keydown', (event: any) => {
-                (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+            userInput.addEventListener('keydown', (event: any) => {
+                resultText.innerHTML = `&nbsp;`;
                 if (event.key == 'Enter') { calculate(); }
             });
 
             //All numpad buttons -> symbols & digits
             document.querySelectorAll('#down-section-wrapper button').forEach((htmlElement: any, index: number) => {
-                if (htmlElement == clearButton) {
+                if (clearButton && htmlElement == clearButton) {
 
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
                         let intervalID: any = undefined;
                         let onlyOnceShort: boolean = true;
 
-                        clearButton?.addEventListener('pointerdown', (event: any) => {
-                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+                        clearButton.addEventListener('pointerdown', (event: any) => {
+                            resultText.innerHTML = `&nbsp;`;
                             let startTime = Date.now();
 
-                            let inputValue = (userInput as HTMLInputElement).value.toString();
-                            (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                            userInput.value = userInput.value.toString().slice(0, -1);
 
                             const repeatFn = () => {
                                 let timeDifference = Date.now() - startTime;
-                                let inputValue = (userInput as HTMLInputElement).value.toString();
+                                let inputValue = userInput.value.toString();
 
                                 if (timeDifference >= 2000) {
-                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -inputValue.length);
+                                    userInput.value = inputValue.slice(0, -inputValue.length);
                                     onlyOnceShort = false;
                                     clearInterval(intervalID);
                                 }
                                 else if (timeDifference >= 1500) {
-                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -2)
+                                    userInput.value = inputValue.slice(0, -2);
                                     onlyOnceShort = false;
                                 }
                                 else {
-                                    (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
+                                    userInput.value = inputValue.slice(0, -1);
                                 }
 
                             }
                             intervalID = window.setInterval(repeatFn, (shortVibationMs + longerVibrrationMs));
                         });
-                        clearButton?.addEventListener('pointerup', () => {
+                        clearButton.addEventListener('pointerup', () => {
                             clearInterval(intervalID);
                             if (onlyOnceShort) {
                                 vibrateDevice(shortVibationMs);
                             } else vibrateDevice(longerVibrrationMs);
                             onlyOnceShort = true;
-                            userInput?.focus();
+                            userInput.focus();
                         });
-                        clearButton?.addEventListener('pointercancel', () => {
+                        clearButton.addEventListener('pointercancel', () => {
                             clearInterval(intervalID);
                             onlyOnceShort = true;
-                            userInput?.focus();
+                            userInput.focus();
                         });
                     } else {
-                        clearButton?.addEventListener('click', (event: any) => {
-                            let inputValue = (userInput as HTMLInputElement).value.toString();
-                            (userInput as HTMLInputElement).value = inputValue.slice(0, -1);
-                            userInput?.focus();
+                        clearButton.addEventListener('click', (event: any) => {
+                            userInput.value = userInput.value.toString().slice(0, -1);
+                            userInput.focus();
                             vibrateDevice(shortVibationMs);
                         });
                     }
                 }
-                else if (htmlElement == resultButton) {
+                else if (resultButton && htmlElement == resultButton) {
 
                     //When result button clicked or pressed for longer time
                     let intervalID: any = undefined;
@@ -131,24 +130,24 @@ export default function App() {
 
                     if (window.PointerEvent) {
 
-                        let previousResultText: any = '';
+                        let previousResultText: string | null = '';
 
-                        resultButton?.addEventListener('pointerdown', (event: any) => {
+                        resultButton.addEventListener('pointerdown', (event: any) => {
                             calculate();
                             let startTime = Date.now();
 
-                            if (previousResultText == document.getElementById("result_text")?.innerText) {
-                                (userInput as HTMLInputElement).value = previousResultText;
+                            if (previousResultText == resultText.innerText) {
+                                userInput.value = previousResultText;
                             } else {
                                 const repeatFn = () => {
-                                    let resultTextText = document.getElementById("result_text")?.innerText;
-                                    let userInputText = (userInput as HTMLInputElement).value.toString();
+                                    let resultTextText = resultText.innerText;
+                                    let userInputText = userInput.value.toString();
 
                                     let timeDifference = Date.now() - startTime;
 
                                     if (timeDifference > ((shortVibationMs + longerVibrrationMs) * 4) && resultTextText != userInputText && Number(resultTextText?.replaceAll('−', '-'))) {
                                         shortOne = false;
-                                        (userInput as HTMLInputElement).value = resultTextText as string;
+                                        userInput.value = resultTextText as string;
                                         vibrateDevice(longerVibrrationMs);
                                         clearInterval(intervalID);
                                     }
@@ -162,25 +161,25 @@ export default function App() {
                                 clearInterval(intervalID);
                             }
 
-                            let resultTextText = document.getElementById("result_text")?.innerText;
+                            let resultTextText = resultText.innerText;
                             previousResultText = Number(resultTextText?.replaceAll('−', '-')) ? resultTextText : null;
 
                             shortOne = true;
-                            userInput?.focus();
+                            userInput.focus();
                         });
-                        resultButton?.addEventListener('pointercancel', (event: any) => { clearInterval(intervalID); userInput?.focus(); });
+                        resultButton.addEventListener('pointercancel', (event: any) => { clearInterval(intervalID); userInput.focus(); });
                     }
                     else resultButton?.addEventListener('click', (event: any) => {
                         calculate();
                         vibrateDevice(100);
                     });
                 }
-                else if (htmlElement == settingsButton) {
+                else if (settingsButton && htmlElement == settingsButton) {
 
                     //Settings button
                     htmlElement.addEventListener('click', (event: any) => {
                         console.dir(settingsDialog)
-                        userInput?.focus();
+                        userInput.focus();
                     });
                 }
                 else {
@@ -192,15 +191,14 @@ export default function App() {
                         if (mathOperations.includes(buttonSymbol)) {
                             vibrateDevice(shortVibationMs);
                         }
-                        (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                        (userInput as HTMLInputElement).value += buttonSymbol;
+                        resultText.innerHTML = `&nbsp;`;
+                        userInput.value += buttonSymbol;
                         userInput?.focus();
-
                     });
                 };
             });
         }
-    }, [])
+    }, []);
 
 
     return (
