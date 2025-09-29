@@ -3,17 +3,10 @@ import { useEffect, useRef } from 'react';
 
 export default function Settings({ onSendData }: any) {
 
-    const dialogRef = useRef(null);
+    const dialogRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
-
-
-
         onSendData(dialogRef);
-
-
-
-
     }, [])
 
 
@@ -22,7 +15,7 @@ export default function Settings({ onSendData }: any) {
             <SettingsIcon />
 
             <dialog ref={dialogRef}>
-                
+
                 <p>...</p>
 
             </dialog>
