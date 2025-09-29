@@ -1,11 +1,23 @@
 import { evaluate } from 'mathjs';
 import './App.scss';
 import Button from '@mui/material/Button';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
-import SettingsIcon from '@mui/icons-material/Settings';
+
+import Settings from './Settings/Settings';
 
 export default function App() {
+
+    const userInputRef = useRef<HTMLInputElement>(null);
+    const resultTextRef = useRef<HTMLParagraphElement>(null);
+
+    const buttonsPadRef = useRef<HTMLDivElement>(null)
+    const clearButtonRef = useRef<HTMLButtonElement>(null);
+
+    const resultButtonRef = useRef<HTMLButtonElement>(null);
+    const settingsButtonRef = useRef<any>(null);
+
+    let settingsDialog: any;
 
     function vibrateDevice(time: number) {
         if ('vibrate' in window.navigator) window.navigator.vibrate(time);
@@ -17,16 +29,18 @@ export default function App() {
 
     useEffect(() => {
 
-        let userInput = document.getElementById('user_input');
-        let resultText = document.getElementById('result_text');
+        let userInput = userInputRef.current;
+        let resultText = resultTextRef.current;
 
-        let buttonsPad = document.getElementById('down-section-wrapper');
-        let clearButton = document.getElementById('clear_button');
-        let resultButton = document.getElementById('result_button');
+        let buttonsPad = buttonsPadRef.current;
+        let clearButton = clearButtonRef.current;
+        let resultButton = resultButtonRef.current;
+
+        let settingsButton = settingsButtonRef.current;
 
         const calculate = () => {
-            if (userInput) {
-                let inputValue = (userInput as HTMLInputElement).value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
+            if (userInput && resultText) {
+                let inputValue = userInput.value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
                     let result = evaluate(inputValue);
                     if (result == Number(result) || result == 0) {
@@ -34,11 +48,11 @@ export default function App() {
                         let positiveOrNegativeSymbol = result < 0 ? '−' : '';
                         result = Math.abs(result);
 
-                        (resultText as HTMLParagraphElement).textContent = positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString();
+                        resultText.textContent = positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString();
                         return (positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
                     } else return null;
                 } catch (error: any) {
-                    (resultText as HTMLParagraphElement).textContent = (userInput as HTMLInputElement).value == '' ? '' : 'error'.toUpperCase();
+                    resultText.textContent = (userInput as HTMLInputElement).value == '' ? '' : 'error'.toUpperCase();
                     return null;
                 }
             }
@@ -54,6 +68,7 @@ export default function App() {
             //All numpad buttons -> symbols & digits
             document.querySelectorAll('#down-section-wrapper button').forEach((htmlElement: any, index: number) => {
                 if (htmlElement == clearButton) {
+
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
                         let intervalID: any = undefined;
@@ -109,6 +124,7 @@ export default function App() {
                     }
                 }
                 else if (htmlElement == resultButton) {
+
                     //When result button clicked or pressed for longer time
                     let intervalID: any = undefined;
                     let shortOne: boolean = true;
@@ -158,23 +174,28 @@ export default function App() {
                         calculate();
                         vibrateDevice(100);
                     });
-                } else {
+                }
+                else if (htmlElement == settingsButton) {
 
-                    //Other buttons including math operation buttons
+                    //Settings button
+                    htmlElement.addEventListener('click', (event: any) => {
+                        console.dir(settingsDialog)
+                        userInput?.focus();
+                    });
+                }
+                else {
+
+                    //Other buttons including math operation buttons except settings button
                     let buttonSymbol = htmlElement.textContent;
                     htmlElement.addEventListener('click', (event: any) => {
-                        if (buttonSymbol.length > 0) {
-                            if (mathOperations.includes(buttonSymbol)) {
-                                vibrateDevice(shortVibationMs);
-                            }
-                            (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
-                            (userInput as HTMLInputElement).value += buttonSymbol;
-                            userInput?.focus();
-                        } else {
-                            
-                            //Settings button
-                            console.log("Simbol je: [" + buttonSymbol + "]");
+
+                        if (mathOperations.includes(buttonSymbol)) {
+                            vibrateDevice(shortVibationMs);
                         }
+                        (resultText as HTMLParagraphElement).innerHTML = `&nbsp;`;
+                        (userInput as HTMLInputElement).value += buttonSymbol;
+                        userInput?.focus();
+
                     });
                 };
             });
@@ -186,28 +207,26 @@ export default function App() {
         <div id='app-wrapper'>
             <div id='up-section-wrapper'>
                 <div>
-                    <input id='user_input' placeholder='0' autoFocus type='text' inputMode='none' />
+                    <input id='user_input' placeholder='0' autoFocus type='text' inputMode='none' ref={userInputRef} />
                 </div>
                 <div>
-                    <p id='result_text'>&nbsp;</p>
+                    <p id='result_text' ref={resultTextRef}>&nbsp;</p>
                 </div>
             </div>
-            <div id='down-section-wrapper'>
+            <div id='down-section-wrapper' ref={buttonsPadRef}>
 
                 <div id='side-operations'>
                     <Button variant='contained' size="large">&times;</Button>
                     <Button variant='contained' size="large">&#43;</Button>
                     <Button variant='contained' size="large">&minus;</Button>
                     <Button variant='contained' size="large">&divide;</Button>
-                    <Button variant='contained' size="large">
-                        <SettingsIcon />
-                    </Button>
+                    <Button variant='contained' size="large" ref={settingsButtonRef}><Settings onSendData={(data: any) => settingsDialog = data.current} /></Button>
                 </div>
 
                 <div id='symbols-and-digits-wrapper'>
 
                     <div className='one-row'>
-                        <Button variant='contained' size="large" id='clear_button'>
+                        <Button variant='contained' size="large" id='clear_button' ref={clearButtonRef}>
                             &nbsp;<BackspaceIcon />&nbsp;
                         </Button>
                     </div>
@@ -233,7 +252,7 @@ export default function App() {
                     <div className='one-row'>
                         <Button variant='contained' size="large" >.</Button>
                         <Button variant='contained' size="large" >0</Button>
-                        <Button id='result_button' variant='contained' size="large">=</Button>
+                        <Button id='result_button' variant='contained' size="large" ref={resultButtonRef}>=</Button>
                     </div>
                 </div>
             </div>

@@ -145,11 +145,12 @@
             height: 100%;
 
             max-width: 2.5cm;
+            @media (min-width: 12cm) {
+                max-width: 2.5cm;
+            }
 
             margin: 0;
             padding: 0;
-
-            flex-grow: 1;
 
             button {
                 background-color: rgb(5, 72, 120);
