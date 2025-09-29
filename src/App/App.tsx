@@ -38,7 +38,6 @@ export default function App() {
 
         let settingsButton = settingsButtonRef.current as any;
 
-
         const calculate = () => {
             if (userInput && resultText) {
                 let inputValue = userInput.value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
@@ -69,7 +68,6 @@ export default function App() {
             //All numpad buttons -> symbols & digits
             document.querySelectorAll('#down-section-wrapper button').forEach((htmlElement: any, index: number) => {
                 if (clearButton && htmlElement == clearButton) {
-
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
                         let intervalID: any = undefined;
@@ -94,18 +92,13 @@ export default function App() {
                                     userInput.value = inputValue.slice(0, -2);
                                     onlyOnceShort = false;
                                 }
-                                else {
-                                    userInput.value = inputValue.slice(0, -1);
-                                }
-
+                                else { userInput.value = inputValue.slice(0, -1); }
                             }
                             intervalID = window.setInterval(repeatFn, (shortVibationMs + longerVibrrationMs));
                         });
                         clearButton.addEventListener('pointerup', () => {
                             clearInterval(intervalID);
-                            if (onlyOnceShort) {
-                                vibrateDevice(shortVibationMs);
-                            } else vibrateDevice(longerVibrrationMs);
+                            onlyOnceShort ? vibrateDevice(shortVibationMs) : vibrateDevice(longerVibrrationMs);
                             onlyOnceShort = true;
                             userInput.focus();
                         });
@@ -123,22 +116,19 @@ export default function App() {
                     }
                 }
                 else if (resultButton && htmlElement == resultButton) {
-
                     //When result button clicked or pressed for longer time
                     let intervalID: any = undefined;
                     let shortOne: boolean = true;
 
                     if (window.PointerEvent) {
-
                         let previousResultText: string | null = '';
 
                         resultButton.addEventListener('pointerdown', (event: any) => {
                             calculate();
                             let startTime = Date.now();
 
-                            if (previousResultText == resultText.innerText) {
-                                userInput.value = previousResultText;
-                            } else {
+                            if (previousResultText == resultText.innerText) { userInput.value = previousResultText; }
+                            else {
                                 const repeatFn = () => {
                                     let resultTextText = resultText.innerText;
                                     let userInputText = userInput.value.toString();
@@ -175,7 +165,6 @@ export default function App() {
                     });
                 }
                 else if (settingsButton && htmlElement == settingsButton) {
-
                     //Settings button
                     htmlElement.addEventListener('click', (event: any) => {
                         console.dir(settingsDialog)
@@ -183,14 +172,11 @@ export default function App() {
                     });
                 }
                 else {
-
                     //Other buttons including math operation buttons except settings button
                     let buttonSymbol = htmlElement.textContent;
                     htmlElement.addEventListener('click', (event: any) => {
 
-                        if (mathOperations.includes(buttonSymbol)) {
-                            vibrateDevice(shortVibationMs);
-                        }
+                        if (mathOperations.includes(buttonSymbol)) { vibrateDevice(shortVibationMs); }
                         resultText.innerHTML = `&nbsp;`;
                         userInput.value += buttonSymbol;
                         userInput?.focus();
