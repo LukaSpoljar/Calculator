@@ -1,7 +1,35 @@
-.custom-dialog {
+.MuiDialog-root {
+    display: flex;
+    flex-direction: row;
 
-    width:100% !important;
-    height: 100% !important;
+    width: 100%;
 
+    .MuiDialog-container {
+        width: 100%;
 
+        .MuiDialogContent-root {
+            padding: 0;
+            margin: 0;
+
+            display: flex;
+
+            @media (orientation: landscape) {
+                flex-direction: row;
+            }
+
+            @media (orientation: portrait) {
+                flex-direction: column;
+            }
+
+            button {
+                border-radius: 0px;
+                background-color: #1378c0;
+
+                flex-grow: 1;
+
+                font-size: 2cm;
+                font-weight: 1000;
+            }
+        }
+    }
 }
