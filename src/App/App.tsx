@@ -1,10 +1,12 @@
 import { evaluate } from 'mathjs';
 import './App.scss';
 import Button from '@mui/material/Button';
-import { useEffect, useRef } from 'react';
+import { use, useEffect, useRef, useState } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
+import SettingsIcon from '@mui/icons-material/Settings';
 
-import Settings from './Settings/Settings';
+import Settings from './Settings Dialog/Settings';
+import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
 
 export default function App() {
 
@@ -18,6 +20,18 @@ export default function App() {
     const settingsButtonRef = useRef<any>(null);
 
     let settingsDialog: HTMLDialogElement;
+
+
+    const [open, setOpen] = useState(false);
+
+
+
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+
+
 
     function vibrateDevice(time: number) {
         if ('vibrate' in window.navigator) window.navigator.vibrate(time);
@@ -37,6 +51,8 @@ export default function App() {
         let resultButton = resultButtonRef.current as HTMLButtonElement;
 
         let settingsButton = settingsButtonRef.current as any;
+
+
 
         const calculate = () => {
             if (userInput && resultText) {
@@ -165,11 +181,8 @@ export default function App() {
                     });
                 }
                 else if (settingsButton && htmlElement == settingsButton) {
-                    //Settings button
-                    htmlElement.addEventListener('click', (event: any) => {
-                        console.dir(settingsDialog)
-                        userInput.focus();
-                    });
+
+                    //THIS BLOCK IS UNNECCESSARY
                 }
                 else {
                     //Other buttons including math operation buttons except settings button
@@ -185,6 +198,8 @@ export default function App() {
             });
         }
     }, []);
+
+
 
 
     return (
@@ -204,7 +219,23 @@ export default function App() {
                     <Button variant='contained' size="large">&#43;</Button>
                     <Button variant='contained' size="large">&minus;</Button>
                     <Button variant='contained' size="large">&divide;</Button>
-                    <Button variant='contained' size="large" ref={settingsButtonRef}><Settings onSendData={(data: any) => settingsDialog = data.current} /></Button>
+                    <Button variant='contained' size="large" ref={settingsButtonRef} startIcon={<SettingsIcon />} onClick={handleOpen} />
+                    <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
+                        console.log(data);
+                        userInputRef?.current?.focus();
+                    }} />
+
+                    {
+                        //<Settings onSendData={(data: any) => settingsDialog = data.current} /></Button>
+
+
+                    }
+
+
+
+
+
+
                 </div>
 
                 <div id='symbols-and-digits-wrapper'>
