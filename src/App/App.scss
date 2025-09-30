@@ -35,7 +35,7 @@
         height: 30%;
         min-height: fit-content;
 
-        padding: 0.6%;
+        padding: 1%;
 
         div {
             display: flex;
@@ -106,6 +106,7 @@
         flex-direction: row;
 
         height: 100%;
+        width: 100%;
 
         align-items: stretch;
         justify-content: stretch;
@@ -114,9 +115,6 @@
         padding: 0;
 
         user-select: none;
-        flex-grow: 1;
-
-        flex-grow: 1;
 
         //margin: 1em;
 

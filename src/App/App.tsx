@@ -24,13 +24,8 @@ export default function App() {
 
     const [open, setOpen] = useState(false);
 
-
-
-
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
-
 
 
     function vibrateDevice(time: number) {
@@ -219,23 +214,12 @@ export default function App() {
                     <Button variant='contained' size="large">&#43;</Button>
                     <Button variant='contained' size="large">&minus;</Button>
                     <Button variant='contained' size="large">&divide;</Button>
-                    <Button variant='contained' size="large" ref={settingsButtonRef} startIcon={<SettingsIcon />} onClick={handleOpen} />
+                    <Button variant='contained' size="large" ref={settingsButtonRef} onClick={handleOpen}><SettingsIcon /></Button>
                     <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
-                        console.log(data);
-                        userInputRef?.current?.focus();
+                        let userInput = userInputRef.current as HTMLInputElement;
+                        userInput.value += data;
+                        userInput.focus();
                     }} />
-
-                    {
-                        //<Settings onSendData={(data: any) => settingsDialog = data.current} /></Button>
-
-
-                    }
-
-
-
-
-
-
                 </div>
 
                 <div id='symbols-and-digits-wrapper'>
