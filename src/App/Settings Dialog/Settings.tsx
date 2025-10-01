@@ -1,12 +1,15 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { useRef } from 'react';
+import { Button, Dialog, DialogContent } from '@mui/material';
 import './Settings.scss';
-
-import { useEffect, useRef, useState } from 'react';
 
 export default function Settings({ open, handleClose, onSendMessage = null }: any) {
 
     const settingsButtonsPadRef = useRef<any>(null);
+    const shortVibationMs = 50;
+
+    const vibrateDevice = (time: number) => 'vibrate' in window.navigator ? window.navigator.vibrate(time) : null;
     const buttonIsClicked = (event: any) => {
+        vibrateDevice(shortVibationMs);
         onSendMessage(event.target.innerText);
         handleClose();
     }

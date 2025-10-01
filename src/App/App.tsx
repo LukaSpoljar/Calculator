@@ -1,12 +1,10 @@
 import { evaluate } from 'mathjs';
-import './App.scss';
 import Button from '@mui/material/Button';
-import { use, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import SettingsIcon from '@mui/icons-material/Settings';
-
 import Settings from './Settings Dialog/Settings';
-import { Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import './App.scss';
 
 export default function App() {
 
@@ -19,18 +17,13 @@ export default function App() {
     const resultButtonRef = useRef<HTMLButtonElement>(null);
     const settingsButtonRef = useRef<any>(null);
 
-    let settingsDialog: HTMLDialogElement;
-
-
     const [open, setOpen] = useState(false);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
 
-    function vibrateDevice(time: number) {
-        if ('vibrate' in window.navigator) window.navigator.vibrate(time);
-    }
+    const vibrateDevice = (time: number) => 'vibrate' in window.navigator ? window.navigator.vibrate(time) : null;
     const mathOperations = ['×', '+', '−', '÷'];
 
     const shortVibationMs = 50;
@@ -46,8 +39,6 @@ export default function App() {
         let resultButton = resultButtonRef.current as HTMLButtonElement;
 
         let settingsButton = settingsButtonRef.current as any;
-
-
 
         const calculate = () => {
             if (userInput && resultText) {
