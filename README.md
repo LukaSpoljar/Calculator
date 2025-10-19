@@ -1,6 +1,5 @@
-<img width="612" height="863" alt="Screenshot 2025-09-17 at 15 41 11" src="https://github.com/user-attachments/assets/8e1875c8-aa26-47c1-ac5f-0257faeaa945" />
 
-<img width="1280" height="799" alt="Screenshot 2025-10-19 at 15 53 24" src="https://github.com/user-attachments/assets/4b1c18da-d05e-4dc6-843c-a76f8ba315f6" />
+<img width="612" height="854" alt="Screenshot 2025-10-19 at 15 58 34" src="https://github.com/user-attachments/assets/b0aca830-759b-48ee-b2d2-036ca9d96f67" />
 
 
 # Getting Started with Create React App
