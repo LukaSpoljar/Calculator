@@ -143,14 +143,17 @@
             height: 100%;
 
             max-width: 2.5cm;
-            @media (min-width: 15cm) {
+            @media (min-width: 10cm) {
                 max-width: 3cm;
+            }
+            @media (min-width: 15cm) {
+                max-width: 4cm;
             }
 
             margin: 0;
             padding: 0;
 
-            button, #settings {
+            button {
                 background-color: rgb(5, 72, 120);
                 flex-grow: 1;
             }
