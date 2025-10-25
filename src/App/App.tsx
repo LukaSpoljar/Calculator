@@ -206,7 +206,7 @@ export default function App() {
                     <Button variant='contained' size="large">&minus;</Button>
                     <Button variant='contained' size="large">&divide;</Button>
                     <Button variant='contained' size="large" ref={settingsButtonRef} onClick={handleOpen}><SettingsIcon /></Button>
-                    <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
+                    <Settings id='settings' open={open} handleClose={handleClose} onSendMessage={(data: any) => {
                         let userInput = userInputRef.current as HTMLInputElement;
                         userInput.value += data;
                         userInput.focus();
