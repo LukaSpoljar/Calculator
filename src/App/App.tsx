@@ -185,9 +185,6 @@ export default function App() {
         }
     }, []);
 
-
-
-
     return (
         <div id='app-wrapper'>
             <div id='up-section-wrapper'>
@@ -199,6 +196,20 @@ export default function App() {
                 </div>
             </div>
             <div id='down-section-wrapper' ref={buttonsPadRef}>
+                <div id='side-operations'>
+                    <Button variant='contained' size="large">&times;</Button>
+                    <Button variant='contained' size="large">&divide;</Button>
+                    <Button variant='contained' size="large">&#43;</Button>
+                    <Button variant='contained' size="large">&minus;</Button>
+    
+                    <Button variant='contained' size="large" ref={settingsButtonRef} onClick={handleOpen}><SettingsIcon /></Button>
+
+                    <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
+                        let userInput = userInputRef.current as HTMLInputElement;
+                        userInput.value += data;
+                        userInput.focus();
+                    }} />
+                </div>
 
                 <div id='symbols-and-digits-wrapper'>
 
@@ -231,21 +242,6 @@ export default function App() {
                         <Button variant='contained' size="large" >0</Button>
                         <Button id='result_button' variant='contained' size="large" ref={resultButtonRef}>=</Button>
                     </div>
-                </div>
-
-                <div id='side-operations'>
-                    <Button variant='contained' size="large">&times;</Button>
-                    <Button variant='contained' size="large">&#43;</Button>
-                    <Button variant='contained' size="large">&minus;</Button>
-                    <Button variant='contained' size="large">&divide;</Button>
-
-                    <Button variant='contained' size="large" ref={settingsButtonRef} onClick={handleOpen}><SettingsIcon /></Button>
-
-                    <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
-                        let userInput = userInputRef.current as HTMLInputElement;
-                        userInput.value += data;
-                        userInput.focus();
-                    }} />
                 </div>
             </div>
         </div>
