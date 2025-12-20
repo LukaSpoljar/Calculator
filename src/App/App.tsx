@@ -52,7 +52,6 @@ export default function App() {
                         let positiveOrNegativeSymbol = result < 0 ? '-' : '';
                         result = Math.abs(result);
 
-                        console.log("To jeeeeeeeeeeee: " + Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString()))
                         return Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
                     } else {
                         return NaN;
@@ -106,7 +105,6 @@ export default function App() {
                             intervalID = window.setInterval(repeatFn, (shortVibationMs + longerVibrrationMs));
                         });
                         clearButton.addEventListener('pointerup', () => {
-
                             const lastChar: string = userInput.value.toString().slice(-1)
                             resultButton.innerText = mathOperations.includes(lastChar) && Number(calcResult.current) ? "ANS" : "=";
 
@@ -136,13 +134,9 @@ export default function App() {
                     let intervalID: any = undefined;
                     let shortOne: boolean = true;
 
-
-
                     if (window.PointerEvent) {
 
                         resultButton.addEventListener('pointerdown', (event: any) => {
-
-
 
                             calcResult.current = calculate(userInput.value);
                             let startTime = Date.now();
@@ -174,17 +168,14 @@ export default function App() {
                         });
                         resultButton?.addEventListener('pointerup', (event: any) => {
 
-                            console.log("POKUS POPOJNTER UP ----> Calc result je: " + calcResult.current);
                             if (shortOne) {
                                 vibrateDevice(shortVibationMs);
                                 clearInterval(intervalID);
                             }
 
-
                             if (resultButton.innerText == "ANS") {
                                 userInput.value += calcResult.previous?.toString().replaceAll('-', '−');
                             } else {
-
                                 calcResult.previous = calcResult.current;
                             }
                             resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
@@ -199,20 +190,18 @@ export default function App() {
                     else resultButton?.addEventListener('click', (event: any) => {
 
                         calcResult.current = calculate(userInput.value);
-                        console.log("KLIK ----> Calc result je: " + calcResult.current);
 
-                        if (Number(calcResult.current)) {
-
-                            if (resultButton.innerText == "ANS") {
-                                userInput.value += calcResult.current.toString().replaceAll('-', '−');
-                            } else {
-                                resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
-                                calcResult.previous = calcResult.current;
-                                resultButton.innerText = "=";
-                            }
+                        if (resultButton.innerText == "ANS") {
+                            userInput.value += calcResult.previous.toString().replaceAll('-', '−');
+                        } else {
+                            calcResult.previous = calcResult.current;
                         }
+                        resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+                        resultButton.innerText = "=";
+
 
                         vibrateDevice(100);
+                        userInput.focus();
                     });
                 }
                 else if (settingsButton && htmlElement == settingsButton) {
@@ -221,7 +210,6 @@ export default function App() {
                 }
                 else {
                     //Other buttons including math operation buttons except settings button
-
                     htmlElement.addEventListener('click', (event: any) => {
 
                         let buttonSymbol: string = event.target.textContent;
