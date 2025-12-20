@@ -1,4 +1,4 @@
-import { evaluate } from 'mathjs';
+import { evaluate, re } from 'mathjs';
 import Button from '@mui/material/Button';
 import { useEffect, useRef, useState } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
@@ -22,12 +22,13 @@ export default function App() {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-
     const vibrateDevice = (time: number) => 'vibrate' in window.navigator ? window.navigator.vibrate(time) : null;
     const mathOperations = ['×', '+', '−', '÷'];
 
     const shortVibationMs = 50;
     const longerVibrrationMs = 150;
+
+    let resultToRemember: number | null = null;
 
     useEffect(() => {
 
@@ -40,35 +41,41 @@ export default function App() {
 
         let settingsButton = settingsButtonRef.current as any;
 
-        const calculate = () => {
+        const calculate = (mathExpression: string): number => {
+
             if (userInput && resultText) {
-                let inputValue = userInput.value.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
+                mathExpression = mathExpression.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
-                    let result = evaluate(inputValue);
+                    let result = evaluate(mathExpression);
                     if (result == Number(result) || result == 0) {
 
-                        let positiveOrNegativeSymbol = result < 0 ? '−' : '';
+                        let positiveOrNegativeSymbol = result < 0 ? '-' : '';
                         result = Math.abs(result);
 
-                        resultText.textContent = positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString();
-                        return (positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
-                    } else return null;
+                        return Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
+                    } else {
+                        return NaN;
+                    };
                 } catch (error: any) {
-                    resultText.textContent = userInput.value == '' ? '' : 'error'.toUpperCase();
-                    return null;
+                    return NaN;
                 }
+            } else {
+                return NaN;
             }
+
         }
 
         if ((userInput && resultButton && clearButton && resultText && buttonsPad) instanceof HTMLElement) {
 
             userInput.addEventListener('keydown', (event: any) => {
                 resultText.innerHTML = `&nbsp;`;
-                if (event.key == 'Enter') { calculate(); }
+                if (event.key == 'Enter') { resultText.innerText = calculate(userInput.value).toString() }
             });
 
             //All numpad buttons -> symbols & digits
             document.querySelectorAll('#down-section-wrapper button').forEach((htmlElement: any, index: number) => {
+
+
                 if (clearButton && htmlElement == clearButton) {
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
@@ -82,6 +89,7 @@ export default function App() {
                             userInput.value = userInput.value.toString().slice(0, -1);
 
                             const repeatFn = () => {
+
                                 let timeDifference = Date.now() - startTime;
                                 let inputValue = userInput.value.toString();
 
@@ -99,6 +107,14 @@ export default function App() {
                             intervalID = window.setInterval(repeatFn, (shortVibationMs + longerVibrrationMs));
                         });
                         clearButton.addEventListener('pointerup', () => {
+
+                            if (mathOperations.includes(userInput.value.toString().slice(-1)) && resultToRemember) {
+                                vibrateDevice(shortVibationMs);
+                                resultButton.innerText = "ANS";
+                            } else {
+                                resultButton.innerText = "="
+                            }
+
                             clearInterval(intervalID);
                             onlyOnceShort ? vibrateDevice(shortVibationMs) : vibrateDevice(longerVibrrationMs);
                             onlyOnceShort = true;
@@ -112,40 +128,59 @@ export default function App() {
                     } else {
                         clearButton.addEventListener('click', (event: any) => {
                             userInput.value = userInput.value.toString().slice(0, -1);
+                            if (mathOperations.includes(userInput.value.toString().slice(-1)) && Number(resultToRemember)) {
+                                vibrateDevice(shortVibationMs);
+                                resultButton.innerText = "ANS";
+                            } else {
+                                resultButton.innerText = "=";
+                            }
                             userInput.focus();
                             vibrateDevice(shortVibationMs);
                         });
                     }
                 }
                 else if (resultButton && htmlElement == resultButton) {
+
                     //When result button clicked or pressed for longer time
                     let intervalID: any = undefined;
                     let shortOne: boolean = true;
 
                     if (window.PointerEvent) {
-                        let previousResultText: string | null = '';
+                        resultToRemember = null;
 
                         resultButton.addEventListener('pointerdown', (event: any) => {
-                            calculate();
+
+                            if (Number(calculate(userInput.value)))
+                                resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+
+
                             let startTime = Date.now();
 
-                            if (previousResultText == resultText.innerText) { userInput.value = previousResultText; }
+                            if (resultToRemember?.toString() == resultText.innerText.replaceAll('−', '-')) { userInput.value = resultToRemember.toString(); console.log('here'); }
                             else {
                                 const repeatFn = () => {
-                                    let resultTextText = resultText.innerText;
-                                    let userInputText = userInput.value.toString();
+                                    let tmpResultText: string = resultText.innerText;
+                                    let tmpUserInputText = userInput.value.toString();
 
                                     let timeDifference = Date.now() - startTime;
 
-                                    if (timeDifference > ((shortVibationMs + longerVibrrationMs) * 4) && resultTextText != userInputText && Number(resultTextText?.replaceAll('−', '-'))) {
+                                    if (timeDifference > ((shortVibationMs + longerVibrrationMs) * 4) && tmpResultText != tmpUserInputText) {
                                         shortOne = false;
-                                        userInput.value = resultTextText as string;
+                                        if (Number(tmpResultText?.replaceAll('−', '-')) && resultButton.innerText == "=") {
+                                            userInput.value = tmpResultText;
+
+                                        } else if (resultButton.innerText == "ANS") {
+                                            userInput.value += resultToRemember?.toString().replaceAll('-', '−');
+                                        }
+
                                         vibrateDevice(longerVibrrationMs);
                                         clearInterval(intervalID);
                                     }
                                 }
                                 intervalID = window.setInterval(repeatFn, shortVibationMs + longerVibrrationMs);
+
                             }
+
                         });
                         resultButton?.addEventListener('pointerup', (event: any) => {
                             if (shortOne) {
@@ -153,8 +188,17 @@ export default function App() {
                                 clearInterval(intervalID);
                             }
 
-                            let resultTextText = resultText.innerText;
-                            previousResultText = Number(resultTextText?.replaceAll('−', '-')) ? resultTextText : null;
+                            if (resultButton.innerText == "ANS" && Number(resultToRemember)) {
+                                userInput.value += resultToRemember?.toString().replaceAll('-', '−');
+                            } else {
+                                resultToRemember = calculate(userInput.value) as number;
+
+                            }
+
+                            if (Number(resultToRemember)) {
+                                resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+                                resultButton.innerText = "=";
+                            }
 
                             shortOne = true;
                             userInput.focus();
@@ -162,7 +206,20 @@ export default function App() {
                         resultButton.addEventListener('pointercancel', (event: any) => { clearInterval(intervalID); userInput.focus(); });
                     }
                     else resultButton?.addEventListener('click', (event: any) => {
-                        calculate();
+                        if (resultButton.innerText == "ANS" && Number(resultToRemember)) {
+                            userInput.value += resultToRemember?.toString().replaceAll('-', '−');
+                        } else {
+                            resultToRemember = calculate(userInput.value) as number;
+
+                        }
+
+                        if (Number(resultToRemember)) {
+                            resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+                            resultButton.innerText = "=";
+                        }
+
+
+
                         vibrateDevice(100);
                     });
                 }
@@ -172,10 +229,18 @@ export default function App() {
                 }
                 else {
                     //Other buttons including math operation buttons except settings button
-                    let buttonSymbol = htmlElement.textContent;
+
                     htmlElement.addEventListener('click', (event: any) => {
 
-                        if (mathOperations.includes(buttonSymbol)) { vibrateDevice(shortVibationMs); }
+                        let buttonSymbol: string = event.target.textContent;
+
+                        if (mathOperations.includes(buttonSymbol) && Number(resultToRemember)) {
+                            vibrateDevice(shortVibationMs);
+                            resultButton.innerText = "ANS";
+                        } else {
+                            resultButton.innerText = "="
+                        }
+
                         resultText.innerHTML = `&nbsp;`;
                         userInput.value += buttonSymbol;
                         userInput?.focus();
@@ -201,7 +266,7 @@ export default function App() {
                     <Button variant='contained' size="large">&divide;</Button>
                     <Button variant='contained' size="large">&#43;</Button>
                     <Button variant='contained' size="large">&minus;</Button>
-    
+
                     <Button variant='contained' size="large" ref={settingsButtonRef} onClick={handleOpen}><SettingsIcon /></Button>
 
                     <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
