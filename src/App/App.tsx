@@ -43,7 +43,7 @@ export default function App() {
         let settingsButton = settingsButtonRef.current as any;
 
         const calculate = (mathExpression: string): number => {
-            if (userInput && resultText) {
+            if (userInput && resultButton) {
                 mathExpression = mathExpression.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
                     let result = evaluate(mathExpression);
@@ -173,12 +173,19 @@ export default function App() {
                                 clearInterval(intervalID);
                             }
 
+
+
                             if (resultButton.innerText == "ANS") {
                                 userInput.value += calcResult.previous?.toString().replaceAll('-', '−');
                             } else {
                                 calcResult.previous = calcResult.current;
                             }
+
+
                             resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+
+
+
                             resultButton.innerText = "=";
 
 
@@ -196,12 +203,15 @@ export default function App() {
                         } else {
                             calcResult.previous = calcResult.current;
                         }
+
                         resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+
                         resultButton.innerText = "=";
 
 
                         vibrateDevice(100);
                         userInput.focus();
+
                     });
                 }
                 else if (settingsButton && htmlElement == settingsButton) {
