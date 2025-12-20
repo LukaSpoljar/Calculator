@@ -28,7 +28,8 @@ export default function App() {
     const shortVibationMs = 50;
     const longerVibrrationMs = 150;
 
-    let resultToRemember: number | null = null;
+
+    let calcResult: { current: number, previous: number } = { current: NaN, previous: NaN };
 
     useEffect(() => {
 
@@ -42,7 +43,6 @@ export default function App() {
         let settingsButton = settingsButtonRef.current as any;
 
         const calculate = (mathExpression: string): number => {
-
             if (userInput && resultText) {
                 mathExpression = mathExpression.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
                 try {
@@ -52,6 +52,7 @@ export default function App() {
                         let positiveOrNegativeSymbol = result < 0 ? '-' : '';
                         result = Math.abs(result);
 
+                        console.log("To jeeeeeeeeeeee: " + Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString()))
                         return Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
                     } else {
                         return NaN;
@@ -62,7 +63,6 @@ export default function App() {
             } else {
                 return NaN;
             }
-
         }
 
         if ((userInput && resultButton && clearButton && resultText && buttonsPad) instanceof HTMLElement) {
@@ -89,7 +89,6 @@ export default function App() {
                             userInput.value = userInput.value.toString().slice(0, -1);
 
                             const repeatFn = () => {
-
                                 let timeDifference = Date.now() - startTime;
                                 let inputValue = userInput.value.toString();
 
@@ -108,12 +107,8 @@ export default function App() {
                         });
                         clearButton.addEventListener('pointerup', () => {
 
-                            if (mathOperations.includes(userInput.value.toString().slice(-1)) && resultToRemember) {
-                                vibrateDevice(shortVibationMs);
-                                resultButton.innerText = "ANS";
-                            } else {
-                                resultButton.innerText = "="
-                            }
+                            const lastChar: string = userInput.value.toString().slice(-1)
+                            resultButton.innerText = mathOperations.includes(lastChar) && Number(calcResult.current) ? "ANS" : "=";
 
                             clearInterval(intervalID);
                             onlyOnceShort ? vibrateDevice(shortVibationMs) : vibrateDevice(longerVibrrationMs);
@@ -127,13 +122,9 @@ export default function App() {
                         });
                     } else {
                         clearButton.addEventListener('click', (event: any) => {
+                            const lastChar: string = userInput.value.toString().slice(-1);
                             userInput.value = userInput.value.toString().slice(0, -1);
-                            if (mathOperations.includes(userInput.value.toString().slice(-1)) && Number(resultToRemember)) {
-                                vibrateDevice(shortVibationMs);
-                                resultButton.innerText = "ANS";
-                            } else {
-                                resultButton.innerText = "=";
-                            }
+                            resultButton.innerText = mathOperations.includes(lastChar) && Number(calcResult.current) ? "ANS" : "=";
                             userInput.focus();
                             vibrateDevice(shortVibationMs);
                         });
@@ -145,32 +136,33 @@ export default function App() {
                     let intervalID: any = undefined;
                     let shortOne: boolean = true;
 
+
+
                     if (window.PointerEvent) {
-                        resultToRemember = null;
 
                         resultButton.addEventListener('pointerdown', (event: any) => {
 
-                            if (Number(calculate(userInput.value)))
-                                resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
 
 
+                            calcResult.current = calculate(userInput.value);
                             let startTime = Date.now();
 
-                            if (resultToRemember?.toString() == resultText.innerText.replaceAll('−', '-')) { userInput.value = resultToRemember.toString(); console.log('here'); }
+                            if (calcResult.current.toString() == resultText.innerText.replaceAll('−', '-')) { userInput.value = calcResult.current.toString(); }
                             else {
                                 const repeatFn = () => {
-                                    let tmpResultText: string = resultText.innerText;
-                                    let tmpUserInputText = userInput.value.toString();
+                                    let tmpResultText: string = resultText.innerText.toString();
+                                    let tmpUserInputText: string = userInput.value.toString();
 
                                     let timeDifference = Date.now() - startTime;
 
                                     if (timeDifference > ((shortVibationMs + longerVibrrationMs) * 4) && tmpResultText != tmpUserInputText) {
                                         shortOne = false;
+
                                         if (Number(tmpResultText?.replaceAll('−', '-')) && resultButton.innerText == "=") {
                                             userInput.value = tmpResultText;
-
-                                        } else if (resultButton.innerText == "ANS") {
-                                            userInput.value += resultToRemember?.toString().replaceAll('-', '−');
+                                        } else if (Number(calcResult.current) && resultButton.innerText == "ANS") {
+                                            userInput.value += calcResult.current?.toString().replaceAll('-', '−');
+                                            calcResult.current = calculate(userInput.value) as number;
                                         }
 
                                         vibrateDevice(longerVibrrationMs);
@@ -178,27 +170,26 @@ export default function App() {
                                     }
                                 }
                                 intervalID = window.setInterval(repeatFn, shortVibationMs + longerVibrrationMs);
-
                             }
-
                         });
                         resultButton?.addEventListener('pointerup', (event: any) => {
+
+                            console.log("POKUS POPOJNTER UP ----> Calc result je: " + calcResult.current);
                             if (shortOne) {
                                 vibrateDevice(shortVibationMs);
                                 clearInterval(intervalID);
                             }
 
-                            if (resultButton.innerText == "ANS" && Number(resultToRemember)) {
-                                userInput.value += resultToRemember?.toString().replaceAll('-', '−');
+
+                            if (resultButton.innerText == "ANS") {
+                                userInput.value += calcResult.previous?.toString().replaceAll('-', '−');
                             } else {
-                                resultToRemember = calculate(userInput.value) as number;
 
+                                calcResult.previous = calcResult.current;
                             }
+                            resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+                            resultButton.innerText = "=";
 
-                            if (Number(resultToRemember)) {
-                                resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
-                                resultButton.innerText = "=";
-                            }
 
                             shortOne = true;
                             userInput.focus();
@@ -206,19 +197,20 @@ export default function App() {
                         resultButton.addEventListener('pointercancel', (event: any) => { clearInterval(intervalID); userInput.focus(); });
                     }
                     else resultButton?.addEventListener('click', (event: any) => {
-                        if (resultButton.innerText == "ANS" && Number(resultToRemember)) {
-                            userInput.value += resultToRemember?.toString().replaceAll('-', '−');
-                        } else {
-                            resultToRemember = calculate(userInput.value) as number;
 
+                        calcResult.current = calculate(userInput.value);
+                        console.log("KLIK ----> Calc result je: " + calcResult.current);
+
+                        if (Number(calcResult.current)) {
+
+                            if (resultButton.innerText == "ANS") {
+                                userInput.value += calcResult.current.toString().replaceAll('-', '−');
+                            } else {
+                                resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+                                calcResult.previous = calcResult.current;
+                                resultButton.innerText = "=";
+                            }
                         }
-
-                        if (Number(resultToRemember)) {
-                            resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
-                            resultButton.innerText = "=";
-                        }
-
-
 
                         vibrateDevice(100);
                     });
@@ -234,11 +226,11 @@ export default function App() {
 
                         let buttonSymbol: string = event.target.textContent;
 
-                        if (mathOperations.includes(buttonSymbol) && Number(resultToRemember)) {
+                        if (mathOperations.includes(buttonSymbol) && Number(calcResult.current)) {
                             vibrateDevice(shortVibationMs);
                             resultButton.innerText = "ANS";
                         } else {
-                            resultButton.innerText = "="
+                            resultButton.innerText = "=";
                         }
 
                         resultText.innerHTML = `&nbsp;`;
