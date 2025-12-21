@@ -31,6 +31,7 @@ export default function App() {
 
     let calcResult: { current: number, previous: number } = { current: NaN, previous: NaN };
 
+
     useEffect(() => {
 
         let userInput = userInputRef.current as HTMLInputElement;
@@ -52,7 +53,7 @@ export default function App() {
                         let positiveOrNegativeSymbol = result < 0 ? '-' : '';
                         result = Math.abs(result);
 
-                        return Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
+                        return result === Infinity ? NaN : Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
                     } else {
                         return NaN;
                     };
@@ -68,7 +69,12 @@ export default function App() {
 
             userInput.addEventListener('keydown', (event: any) => {
                 resultText.innerHTML = `&nbsp;`;
-                if (event.key == 'Enter') { resultText.innerText = calculate(userInput.value).toString() }
+                resultButton.innerText = "=";
+                if (event.key == 'Enter') {
+                    calcResult.current = calculate(userInput.value);
+                    calcResult.previous = calcResult.current;
+                    resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+                }
             });
 
             //All numpad buttons -> symbols & digits
@@ -154,8 +160,9 @@ export default function App() {
 
                                         if (Number(tmpResultText?.replaceAll('−', '-')) && resultButton.innerText == "=") {
                                             userInput.value = tmpResultText;
+                                            calcResult.current = calculate(userInput.value) as number;
                                         } else if (Number(calcResult.current) && resultButton.innerText == "ANS") {
-                                            userInput.value += calcResult.current?.toString().replaceAll('-', '−');
+                                            userInput.value += calcResult.current.toString().replaceAll('-', '−');
                                             calcResult.current = calculate(userInput.value) as number;
                                         }
 
@@ -171,23 +178,18 @@ export default function App() {
                             if (shortOne) {
                                 vibrateDevice(shortVibationMs);
                                 clearInterval(intervalID);
+
+                                if (resultButton.innerText == "ANS") {
+                                    userInput.value += calcResult.previous?.toString().replaceAll('-', '−');
+                                }
+                                calcResult.current = calculate(userInput.value)
                             }
 
-
-
-                            if (resultButton.innerText == "ANS") {
-                                userInput.value += calcResult.previous?.toString().replaceAll('-', '−');
-                            } else {
+                            if (Number(calcResult.current)) {
+                                resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
                                 calcResult.previous = calcResult.current;
+                                resultButton.innerText = "=";
                             }
-
-
-                            resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
-
-
-
-                            resultButton.innerText = "=";
-
 
                             shortOne = true;
                             userInput.focus();
@@ -196,22 +198,20 @@ export default function App() {
                     }
                     else resultButton?.addEventListener('click', (event: any) => {
 
-                        calcResult.current = calculate(userInput.value);
-
                         if (resultButton.innerText == "ANS") {
                             userInput.value += calcResult.previous.toString().replaceAll('-', '−');
-                        } else {
-                            calcResult.previous = calcResult.current;
                         }
 
-                        resultText.innerText = calculate(userInput.value).toString().replaceAll('-', '−');
+                        calcResult.current = calculate(userInput.value);
 
-                        resultButton.innerText = "=";
-
+                        if (Number(calcResult.current)) {
+                            resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+                            calcResult.previous = calcResult.current;
+                            resultButton.innerText = "=";
+                        }
 
                         vibrateDevice(100);
                         userInput.focus();
-
                     });
                 }
                 else if (settingsButton && htmlElement == settingsButton) {
@@ -219,6 +219,7 @@ export default function App() {
                     //THIS BLOCK IS UNNECCESSARY
                 }
                 else {
+
                     //Other buttons including math operation buttons except settings button
                     htmlElement.addEventListener('click', (event: any) => {
 
