@@ -1,4 +1,4 @@
-import { evaluate, re } from 'mathjs';
+import { cos, evaluate, number } from 'mathjs';
 import Button from '@mui/material/Button';
 import { useEffect, useRef, useState } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
@@ -7,6 +7,8 @@ import Settings from './Settings Dialog/Settings';
 import './App.scss';
 
 export default function App() {
+
+    const ERROR_TEXT: string = 'ERROR';
 
     const userInputRef = useRef<HTMLInputElement>(null);
     const resultTextRef = useRef<HTMLParagraphElement>(null);
@@ -29,7 +31,7 @@ export default function App() {
     const longerVibrrationMs = 150;
 
 
-    let calcResult: { current: number, previous: number } = { current: NaN, previous: NaN };
+    let calcResult: { current: number | string, previous: number | string } = { current: 0, previous: 0 };
 
 
     useEffect(() => {
@@ -43,9 +45,12 @@ export default function App() {
 
         let settingsButton = settingsButtonRef.current as any;
 
-        const calculate = (mathExpression: string): number => {
+        const calculate = (mathExpression: string): number | string => {
             if (userInput && resultButton) {
                 mathExpression = mathExpression.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
+                if (mathExpression.length === 0) {
+                    return 0;
+                }
                 try {
                     let result = evaluate(mathExpression);
                     if (result == Number(result) || result == 0) {
@@ -53,26 +58,21 @@ export default function App() {
                         let positiveOrNegativeSymbol = result < 0 ? '-' : '';
                         result = Math.abs(result);
 
-                        return result === Infinity ? NaN : Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
-                    } else {
-                        return NaN;
-                    };
-                } catch (error: any) {
-                    return NaN;
-                }
-            } else {
-                return NaN;
-            }
+                        return result === Infinity ? ERROR_TEXT : Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
+                    } else { return ERROR_TEXT; };
+                } catch (error: any) { return ERROR_TEXT; }
+            } else { return ERROR_TEXT; }
         }
 
         if ((userInput && resultButton && clearButton && resultText && buttonsPad) instanceof HTMLElement) {
 
-            userInput.addEventListener('keydown', (event: any) => {
+            userInput.addEventListener('keyup', (event: any) => {
                 resultText.innerHTML = `&nbsp;`;
                 resultButton.innerText = "=";
+
+                calcResult.current = calculate(userInput.value);
+
                 if (event.key == 'Enter') {
-                    calcResult.current = calculate(userInput.value);
-                    calcResult.previous = calcResult.current;
                     resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
                 }
             });
@@ -80,8 +80,8 @@ export default function App() {
             //All numpad buttons -> symbols & digits
             document.querySelectorAll('#down-section-wrapper button').forEach((htmlElement: any, index: number) => {
 
-
                 if (clearButton && htmlElement == clearButton) {
+
                     //Pointer on CLEAR BUTTON (when deleting)
                     if (window.PointerEvent) {
                         let intervalID: any = undefined;
@@ -112,7 +112,7 @@ export default function App() {
                         });
                         clearButton.addEventListener('pointerup', () => {
                             const lastChar: string = userInput.value.toString().slice(-1)
-                            resultButton.innerText = mathOperations.includes(lastChar) && Number(calcResult.current) ? "ANS" : "=";
+                            resultButton.innerText = mathOperations.includes(lastChar) && typeof (calcResult.current) === 'number' ? "ANS" : "=";
 
                             clearInterval(intervalID);
                             onlyOnceShort ? vibrateDevice(shortVibationMs) : vibrateDevice(longerVibrrationMs);
@@ -128,12 +128,13 @@ export default function App() {
                         clearButton.addEventListener('click', (event: any) => {
                             const lastChar: string = userInput.value.toString().slice(-1);
                             userInput.value = userInput.value.toString().slice(0, -1);
-                            resultButton.innerText = mathOperations.includes(lastChar) && Number(calcResult.current) ? "ANS" : "=";
+                            resultButton.innerText = mathOperations.includes(lastChar) && typeof (calcResult.current) === 'number' ? "ANS" : "=";
                             userInput.focus();
                             vibrateDevice(shortVibationMs);
                         });
                     }
                 }
+
                 else if (resultButton && htmlElement == resultButton) {
 
                     //When result button clicked or pressed for longer time
@@ -147,7 +148,7 @@ export default function App() {
                             calcResult.current = calculate(userInput.value);
                             let startTime = Date.now();
 
-                            if (calcResult.current.toString() == resultText.innerText.replaceAll('−', '-')) { userInput.value = calcResult.current.toString(); }
+                            if (calcResult.current.toString() == resultText.innerText.replaceAll('−', '-') && typeof calcResult.current == 'number' && resultButton.innerText === '=') { userInput.value = calcResult.current.toString(); }
                             else {
                                 const repeatFn = () => {
                                     let tmpResultText: string = resultText.innerText.toString();
@@ -158,12 +159,15 @@ export default function App() {
                                     if (timeDifference > ((shortVibationMs + longerVibrrationMs) * 4) && tmpResultText != tmpUserInputText) {
                                         shortOne = false;
 
-                                        if (Number(tmpResultText?.replaceAll('−', '-')) && resultButton.innerText == "=") {
+                                        if (typeof tmpResultText?.replaceAll('−', '-') === 'number' && resultButton.innerText == "=") {
                                             userInput.value = tmpResultText;
-                                            calcResult.current = calculate(userInput.value) as number;
-                                        } else if (Number(calcResult.current) && resultButton.innerText == "ANS") {
+                                            calcResult.current = calculate(userInput.value);
+                                        } else if (typeof (calcResult.current) === 'number' && resultButton.innerText == "ANS") {
                                             userInput.value += calcResult.current.toString().replaceAll('-', '−');
-                                            calcResult.current = calculate(userInput.value) as number;
+                                            calcResult.current = calculate(userInput.value);
+                                        } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText == "ANS") {
+                                            userInput.value += calcResult.previous.toString().replaceAll('-', '−');
+                                            calcResult.current = calculate(userInput.value);
                                         }
 
                                         vibrateDevice(longerVibrrationMs);
@@ -178,17 +182,39 @@ export default function App() {
                             if (shortOne) {
                                 vibrateDevice(shortVibationMs);
                                 clearInterval(intervalID);
-
-                                if (resultButton.innerText == "ANS") {
+                                if (typeof (calcResult.current) === 'number' && resultButton.innerText == "ANS") {
+                                    userInput.value += calcResult.current?.toString().replaceAll('-', '−');
+                                    calcResult.current = calculate(userInput.value)
+                                } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText == "ANS") {
                                     userInput.value += calcResult.previous?.toString().replaceAll('-', '−');
+                                    calcResult.current = calculate(userInput.value)
                                 }
-                                calcResult.current = calculate(userInput.value)
                             }
 
-                            if (Number(calcResult.current)) {
-                                resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
-                                calcResult.previous = calcResult.current;
-                                resultButton.innerText = "=";
+                            if (resultButton.innerText === '=') {
+                                if (typeof (calcResult.current) === 'number') {
+                                    resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+                                    calcResult.previous = calcResult.current;
+                                    resultButton.innerText = "=";
+                                }
+                                else if (typeof calcResult.current === 'string') {
+                                    resultText.innerText = calcResult.current as string;
+                                    calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
+                                }
+                            } else {
+                                if (typeof (calcResult.current) === 'number') {
+                                    resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+                                    calcResult.previous = calcResult.current;
+                                    resultButton.innerText = "=";
+                                } else if (typeof (calcResult.previous) === 'number') {
+                                    resultText.innerText = calcResult.previous.toString().replaceAll('-', '−');
+                                    resultButton.innerText = "=";
+                                    calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
+                                }
+                                else if (typeof calcResult.current === 'string') {
+                                    resultText.innerText = calcResult.current as string;
+                                    calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
+                                }
                             }
 
                             shortOne = true;
@@ -198,16 +224,26 @@ export default function App() {
                     }
                     else resultButton?.addEventListener('click', (event: any) => {
 
-                        if (resultButton.innerText == "ANS") {
+                        if (typeof (calcResult.current) === 'number' && resultButton.innerText == "ANS") {
+                            userInput.value += calcResult.current.toString().replaceAll('-', '−');
+                        } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText == "ANS") {
                             userInput.value += calcResult.previous.toString().replaceAll('-', '−');
                         }
 
                         calcResult.current = calculate(userInput.value);
 
-                        if (Number(calcResult.current)) {
+                        if (typeof (calcResult.current) === 'number' && resultButton.innerText === 'ANS') {
                             resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
                             calcResult.previous = calcResult.current;
                             resultButton.innerText = "=";
+                        } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText === 'ANS') {
+                            resultText.innerText = calcResult.previous.toString().replaceAll('-', '−');
+                            resultButton.innerText = "=";
+                            calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
+                        }
+                        else if (typeof calcResult.current === 'string') {
+                            resultText.innerText = calcResult.current as string;
+                            calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
                         }
 
                         vibrateDevice(100);
@@ -225,7 +261,7 @@ export default function App() {
 
                         let buttonSymbol: string = event.target.textContent;
 
-                        if (mathOperations.includes(buttonSymbol) && Number(calcResult.current)) {
+                        if (typeof calcResult.current === 'number' && mathOperations.includes(buttonSymbol)) {
                             vibrateDevice(shortVibationMs);
                             resultButton.innerText = "ANS";
                         } else {
