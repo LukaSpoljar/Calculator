@@ -24,7 +24,10 @@ export default function App() {
     const handleClose = () => setOpen(false);
 
     const vibrateDevice = (time: number) => 'vibrate' in window.navigator ? window.navigator.vibrate(time) : null;
-    const mathOperations = ['×', '+', '−', '÷'];
+
+    const mathOperationsSpecialSymbols = ['×', '+', '−', '÷'];
+    const mathOperationsNormalSymbols = ['*', '+', '-', '/'];
+    const mathOperations = [...mathOperationsNormalSymbols, ...mathOperationsSpecialSymbols];
 
     const shortVibationMs = 50;
     const longerVibrrationMs = 150;
@@ -46,21 +49,20 @@ export default function App() {
                 resultText.innerHTML = `&nbsp;`;
                 resultButton.innerText = "=";
 
+                const lastChar: string = userInput.value.toString().slice(-1);
+                resultButton.innerText = (mathOperations.includes(lastChar) || !lastChar) && typeof calcResult.previous === 'number' && calcResult.previous != 0 ? "ANS" : "=";
+
                 calcResult.setCurrent(userInput.value);
 
                 if (event.key == 'Enter') {
-
                     if (typeof calcResult.current === 'number') {
                         userInput.value = calcResult.current.toString().replaceAll('-', '−');
-                        if (calcResult.current != 0) {
-                            resultText.innerText = userInput.value;
-                        }
+                        resultText.innerText = userInput.value;
                         calcResult.setPrevEqCurrent();
                     }
                     else if (typeof (calcResult.current) === 'string') {
                         resultText.innerText = calcResult.current as string;
                         calcResult.setErrorValues();
-
                     }
                 }
             });
@@ -104,6 +106,8 @@ export default function App() {
 
                             clearInterval(intervalID);
 
+                            calcResult.setCurrent(userInput.value);
+
                             onlyOnceShort ? vibrateDevice(shortVibationMs) : vibrateDevice(longerVibrrationMs);
                             onlyOnceShort = true;
                             userInput.focus();
@@ -118,6 +122,8 @@ export default function App() {
                             const lastChar: string = userInput.value.toString().slice(-1);
                             resultButton.innerText = mathOperations.includes(lastChar) || !lastChar && typeof calcResult.previous === 'number' && calcResult.previous != 0 ? "ANS" : "=";
 
+                            calcResult.setCurrent(userInput.value);
+
                             userInput.focus();
                             vibrateDevice(shortVibationMs);
                         });
@@ -127,8 +133,6 @@ export default function App() {
                 else if (resultButton && htmlElement == resultButton) {
 
                     resultButton?.addEventListener('click', (event: any) => {
-
-                        //calcResult.setCurrent(userInput.value);
 
                         if (resultButton.innerText === '=') {
                             if (typeof (calcResult.current) === 'number') {
@@ -173,8 +177,11 @@ export default function App() {
                         userInput.value += buttonSymbol;
 
                         calcResult.setCurrent(userInput.value);
-                        console.dir(calcResult)
-                        console.log("---------------------------------- BROJEVI, OPERACIJE, TOČKA ------------------------------")
+
+                        /*
+                            console.dir(calcResult)
+                            console.log("---------------------------------- ZNAMENKE, OPERACIJE, TOČKA ------------------------------")
+                        */
 
                         if (typeof calcResult.previous === 'number' && typeof calcResult.current === 'string' && userInput.value.length !== 0 && calcResult.previous != 0) {
                             vibrateDevice(shortVibationMs);
