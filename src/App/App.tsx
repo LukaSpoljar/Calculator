@@ -1,14 +1,13 @@
-import { cos, evaluate, number } from 'mathjs';
+
 import Button from '@mui/material/Button';
 import { useEffect, useRef, useState } from 'react';
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Settings from './Settings Dialog/Settings';
 import './App.scss';
+import { CalcResult, calcResult } from './Result/CalcResult';
 
 export default function App() {
-
-    const ERROR_TEXT: string = 'ERROR';
 
     const userInputRef = useRef<HTMLInputElement>(null);
     const resultTextRef = useRef<HTMLParagraphElement>(null);
@@ -30,10 +29,6 @@ export default function App() {
     const shortVibationMs = 50;
     const longerVibrrationMs = 150;
 
-
-    let calcResult: { current: number | string, previous: number | string } = { current: 0, previous: 0 };
-
-
     useEffect(() => {
 
         let userInput = userInputRef.current as HTMLInputElement;
@@ -45,35 +40,28 @@ export default function App() {
 
         let settingsButton = settingsButtonRef.current as any;
 
-        const calculate = (mathExpression: string): number | string => {
-            if (userInput && resultButton) {
-                mathExpression = mathExpression.replaceAll('÷', '/').replaceAll('×', '*').replaceAll('−', '-');
-                if (mathExpression.length === 0) {
-                    return 0;
-                }
-                try {
-                    let result = evaluate(mathExpression);
-                    if (result == Number(result) || result == 0) {
-
-                        let positiveOrNegativeSymbol = result < 0 ? '-' : '';
-                        result = Math.abs(result);
-
-                        return result === Infinity ? ERROR_TEXT : Number(positiveOrNegativeSymbol + parseFloat(result.toFixed(4)).toString());
-                    } else { return ERROR_TEXT; };
-                } catch (error: any) { return ERROR_TEXT; }
-            } else { return ERROR_TEXT; }
-        }
-
         if ((userInput && resultButton && clearButton && resultText && buttonsPad) instanceof HTMLElement) {
 
             userInput.addEventListener('keyup', (event: any) => {
                 resultText.innerHTML = `&nbsp;`;
                 resultButton.innerText = "=";
 
-                calcResult.current = calculate(userInput.value);
+                calcResult.setCurrent(userInput.value);
 
                 if (event.key == 'Enter') {
-                    resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+
+                    if (typeof calcResult.current === 'number') {
+                        userInput.value = calcResult.current.toString().replaceAll('-', '−');
+                        if (calcResult.current != 0) {
+                            resultText.innerText = userInput.value;
+                        }
+                        calcResult.setPrevEqCurrent();
+                    }
+                    else if (typeof (calcResult.current) === 'string') {
+                        resultText.innerText = calcResult.current as string;
+                        calcResult.setErrorValues();
+
+                    }
                 }
             });
 
@@ -111,10 +99,11 @@ export default function App() {
                             intervalID = window.setInterval(repeatFn, (shortVibationMs + longerVibrrationMs));
                         });
                         clearButton.addEventListener('pointerup', () => {
-                            const lastChar: string = userInput.value.toString().slice(-1)
-                            resultButton.innerText = mathOperations.includes(lastChar) && typeof (calcResult.current) === 'number' ? "ANS" : "=";
+                            const lastChar: string = userInput.value.toString().slice(-1);
+                            resultButton.innerText = (mathOperations.includes(lastChar) || !lastChar) && typeof calcResult.previous === 'number' && calcResult.previous != 0 ? "ANS" : "=";
 
                             clearInterval(intervalID);
+
                             onlyOnceShort ? vibrateDevice(shortVibationMs) : vibrateDevice(longerVibrrationMs);
                             onlyOnceShort = true;
                             userInput.focus();
@@ -127,8 +116,8 @@ export default function App() {
                     } else {
                         clearButton.addEventListener('click', (event: any) => {
                             const lastChar: string = userInput.value.toString().slice(-1);
-                            userInput.value = userInput.value.toString().slice(0, -1);
-                            resultButton.innerText = mathOperations.includes(lastChar) && typeof (calcResult.current) === 'number' ? "ANS" : "=";
+                            resultButton.innerText = mathOperations.includes(lastChar) || !lastChar && typeof calcResult.previous === 'number' && calcResult.previous != 0 ? "ANS" : "=";
+
                             userInput.focus();
                             vibrateDevice(shortVibationMs);
                         });
@@ -137,113 +126,32 @@ export default function App() {
 
                 else if (resultButton && htmlElement == resultButton) {
 
-                    //When result button clicked or pressed for longer time
-                    let intervalID: any = undefined;
-                    let shortOne: boolean = true;
+                    resultButton?.addEventListener('click', (event: any) => {
 
-                    if (window.PointerEvent) {
+                        //calcResult.setCurrent(userInput.value);
 
-                        resultButton.addEventListener('pointerdown', (event: any) => {
+                        if (resultButton.innerText === '=') {
+                            if (typeof (calcResult.current) === 'number') {
+                                let finalCurrent_ResultExpression: string = calcResult.current.toString();
+                                let finalPrevious_ResultExpression: string = calcResult.previous.toString();
 
-                            calcResult.current = calculate(userInput.value);
-                            let startTime = Date.now();
-
-                            if (calcResult.current.toString() == resultText.innerText.replaceAll('−', '-') && typeof calcResult.current == 'number' && resultButton.innerText === '=') { userInput.value = calcResult.current.toString(); }
-                            else {
-                                const repeatFn = () => {
-                                    let tmpResultText: string = resultText.innerText.toString();
-                                    let tmpUserInputText: string = userInput.value.toString();
-
-                                    let timeDifference = Date.now() - startTime;
-
-                                    if (timeDifference > ((shortVibationMs + longerVibrrationMs) * 4) && tmpResultText != tmpUserInputText) {
-                                        shortOne = false;
-
-                                        if (typeof tmpResultText?.replaceAll('−', '-') === 'number' && resultButton.innerText == "=") {
-                                            userInput.value = tmpResultText;
-                                            calcResult.current = calculate(userInput.value);
-                                        } else if (typeof (calcResult.current) === 'number' && resultButton.innerText == "ANS") {
-                                            userInput.value += calcResult.current.toString().replaceAll('-', '−');
-                                            calcResult.current = calculate(userInput.value);
-                                        } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText == "ANS") {
-                                            userInput.value += calcResult.previous.toString().replaceAll('-', '−');
-                                            calcResult.current = calculate(userInput.value);
-                                        }
-
-                                        vibrateDevice(longerVibrrationMs);
-                                        clearInterval(intervalID);
-                                    }
+                                if (finalCurrent_ResultExpression !== finalPrevious_ResultExpression && calcResult.onlyOnce === false) {
+                                    resultText.innerText = finalCurrent_ResultExpression.replaceAll('-', '−');
+                                    calcResult.setPrevEqCurrent();
                                 }
-                                intervalID = window.setInterval(repeatFn, shortVibationMs + longerVibrrationMs);
+                                else { userInput.value = resultText.innerText = finalPrevious_ResultExpression; }
                             }
-                        });
-                        resultButton?.addEventListener('pointerup', (event: any) => {
-
-                            if (shortOne) {
-                                vibrateDevice(shortVibationMs);
-                                clearInterval(intervalID);
-                                if (typeof (calcResult.current) === 'number' && resultButton.innerText == "ANS") {
-                                    userInput.value += calcResult.current?.toString().replaceAll('-', '−');
-                                    calcResult.current = calculate(userInput.value)
-                                } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText == "ANS") {
-                                    userInput.value += calcResult.previous?.toString().replaceAll('-', '−');
-                                    calcResult.current = calculate(userInput.value)
-                                }
+                            else if (typeof (calcResult.current) === 'string') {
+                                resultText.innerText = calcResult.current as string;
+                                calcResult.setErrorValues()
                             }
-
-                            if (resultButton.innerText === '=') {
-                                if (typeof (calcResult.current) === 'number') {
-                                    resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
-                                    calcResult.previous = calcResult.current;
-                                    resultButton.innerText = "=";
-                                }
-                                else if (typeof calcResult.current === 'string') {
-                                    resultText.innerText = calcResult.current as string;
-                                    calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
-                                }
-                            } else {
-                                if (typeof (calcResult.current) === 'number') {
-                                    resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
-                                    calcResult.previous = calcResult.current;
-                                    resultButton.innerText = "=";
-                                } else if (typeof (calcResult.previous) === 'number') {
-                                    resultText.innerText = calcResult.previous.toString().replaceAll('-', '−');
-                                    resultButton.innerText = "=";
-                                    calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
-                                }
-                                else if (typeof calcResult.current === 'string') {
-                                    resultText.innerText = calcResult.current as string;
-                                    calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
-                                }
+                        } else if (resultButton.innerText === 'ANS') {
+                            if (typeof calcResult.previous === 'number') {
+                                userInput.value += calcResult.previous.toString().replaceAll('-', '−');
+                                resultText.innerText = CalcResult.calculate(userInput.value).toString().replaceAll('-', '−');
+                                resultButton.innerText = "=";
                             }
-
-                            shortOne = true;
-                            userInput.focus();
-                        });
-                        resultButton.addEventListener('pointercancel', (event: any) => { clearInterval(intervalID); userInput.focus(); });
-                    }
-                    else resultButton?.addEventListener('click', (event: any) => {
-
-                        if (typeof (calcResult.current) === 'number' && resultButton.innerText == "ANS") {
-                            userInput.value += calcResult.current.toString().replaceAll('-', '−');
-                        } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText == "ANS") {
-                            userInput.value += calcResult.previous.toString().replaceAll('-', '−');
-                        }
-
-                        calcResult.current = calculate(userInput.value);
-
-                        if (typeof (calcResult.current) === 'number' && resultButton.innerText === 'ANS') {
-                            resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
-                            calcResult.previous = calcResult.current;
-                            resultButton.innerText = "=";
-                        } else if (typeof (calcResult.previous) === 'number' && resultButton.innerText === 'ANS') {
-                            resultText.innerText = calcResult.previous.toString().replaceAll('-', '−');
-                            resultButton.innerText = "=";
-                            calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
-                        }
-                        else if (typeof calcResult.current === 'string') {
-                            resultText.innerText = calcResult.current as string;
-                            calcResult = { current: ERROR_TEXT, previous: ERROR_TEXT };
+                            else { resultText.innerText = calcResult.current as string; }
                         }
 
                         vibrateDevice(100);
@@ -261,15 +169,20 @@ export default function App() {
 
                         let buttonSymbol: string = event.target.textContent;
 
-                        if (typeof calcResult.current === 'number' && mathOperations.includes(buttonSymbol)) {
+                        resultText.innerHTML = `&nbsp;`;
+                        userInput.value += buttonSymbol;
+
+                        calcResult.setCurrent(userInput.value);
+                        console.dir(calcResult)
+                        console.log("---------------------------------- BROJEVI, OPERACIJE, TOČKA ------------------------------")
+
+                        if (typeof calcResult.previous === 'number' && typeof calcResult.current === 'string' && userInput.value.length !== 0 && calcResult.previous != 0) {
                             vibrateDevice(shortVibationMs);
                             resultButton.innerText = "ANS";
                         } else {
                             resultButton.innerText = "=";
                         }
 
-                        resultText.innerHTML = `&nbsp;`;
-                        userInput.value += buttonSymbol;
                         userInput?.focus();
                     });
                 };
@@ -289,18 +202,11 @@ export default function App() {
             </div>
             <div id='down-section-wrapper' ref={buttonsPadRef}>
                 <div id='side-operations'>
-                    <Button variant='contained' size="large">&times;</Button>
-                    <Button variant='contained' size="large">&divide;</Button>
-                    <Button variant='contained' size="large">&#43;</Button>
-                    <Button variant='contained' size="large">&minus;</Button>
-
-                    <Button variant='contained' size="large" ref={settingsButtonRef} onClick={handleOpen}><SettingsIcon /></Button>
-
-                    <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
-                        let userInput = userInputRef.current as HTMLInputElement;
-                        userInput.value += data;
-                        userInput.focus();
-                    }} />
+                    <Button variant='contained' size="large"><p>&times;</p></Button>
+                    <Button variant='contained' size="large"><p>&divide;</p></Button>
+                    <Button variant='contained' size="large"><p>&#43;</p></Button>
+                    <Button variant='contained' size="large"><p>&minus;</p></Button>
+                    <Button variant='contained' size="large" ref={settingsButtonRef} onClick={handleOpen}><p><SettingsIcon /></p></Button>
                 </div>
 
                 <div id='symbols-and-digits-wrapper'>
@@ -335,6 +241,13 @@ export default function App() {
                         <Button id='result_button' variant='contained' size="large" ref={resultButtonRef}>=</Button>
                     </div>
                 </div>
+
+
+                <Settings open={open} handleClose={handleClose} onSendMessage={(data: any) => {
+                    let userInput = userInputRef.current as HTMLInputElement;
+                    userInput.value += data;
+                    userInput.focus();
+                }} />
             </div>
         </div>
     )
