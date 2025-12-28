@@ -17,7 +17,7 @@ export class CalcResult {
 
     public setCurrent(tmpValue: string) {
         this.current = CalcResult.calculate(tmpValue);
-        if (this.onlyOnce == true && this.current === ERROR_TEXT) {
+        if (this.onlyOnce == true && this.current === ERROR_TEXT && typeof this.previous !== 'number') {
             this.previous = ERROR_TEXT;
         }
         this.onlyOnce = false;
