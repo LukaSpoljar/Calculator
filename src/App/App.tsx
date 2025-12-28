@@ -5,7 +5,7 @@ import BackspaceIcon from '@mui/icons-material/Backspace';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Settings from './Settings Dialog/Settings';
 import './App.scss';
-import { CalcResult, calcResult } from './Result/CalcResult';
+import { CalcResult, calcResult, ERROR_TEXT } from './Result/CalcResult';
 
 export default function App() {
 
@@ -49,20 +49,29 @@ export default function App() {
                 resultText.innerHTML = `&nbsp;`;
                 resultButton.innerText = "=";
 
-                const lastChar: string = userInput.value.toString().slice(-1);
-                resultButton.innerText = (mathOperations.includes(lastChar) || !lastChar) && typeof calcResult.previous === 'number' && calcResult.previous != 0 ? "ANS" : "=";
-
                 calcResult.setCurrent(userInput.value);
+
+                const lastChar: string = userInput.value.toString().slice(-1);
+                resultButton.innerText = (mathOperations.includes(lastChar) || !lastChar) && typeof calcResult.previous === 'number' && typeof calcResult.current === 'string' ? "ANS" : "=";
 
                 if (event.key == 'Enter') {
                     if (typeof calcResult.current === 'number') {
-                        userInput.value = calcResult.current.toString().replaceAll('-', '−');
-                        resultText.innerText = userInput.value;
+                        resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+                        if (calcResult.previous === calcResult.current) {
+                            userInput.value = resultText.innerText;
+                            resultButton.innerText = "=";
+                        }
                         calcResult.setPrevEqCurrent();
                     }
                     else if (typeof (calcResult.current) === 'string') {
-                        resultText.innerText = calcResult.current as string;
-                        calcResult.setErrorValues();
+                        if (typeof calcResult.previous === 'number') {
+                            userInput.value += calcResult.previous.toString().replaceAll('-', '−');
+                            calcResult.setCurrent(userInput.value);
+                            resultButton.innerText = "=";
+                        } else {
+                            resultText.innerText = calcResult.current as string;
+                            calcResult.setErrorValues();
+                        }
                     }
                 }
             });
@@ -101,12 +110,11 @@ export default function App() {
                             intervalID = window.setInterval(repeatFn, (shortVibationMs + longerVibrrationMs));
                         });
                         clearButton.addEventListener('pointerup', () => {
+
                             const lastChar: string = userInput.value.toString().slice(-1);
-                            resultButton.innerText = (mathOperations.includes(lastChar) || !lastChar) && typeof calcResult.previous === 'number' && calcResult.previous != 0 ? "ANS" : "=";
+                            resultButton.innerText = (mathOperations.includes(lastChar) || !lastChar) && typeof calcResult.previous === 'number' && typeof calcResult.current === 'string' ? "ANS" : "=";
 
                             clearInterval(intervalID);
-
-                            calcResult.setCurrent(userInput.value);
 
                             onlyOnceShort ? vibrateDevice(shortVibationMs) : vibrateDevice(longerVibrrationMs);
                             onlyOnceShort = true;
@@ -119,10 +127,9 @@ export default function App() {
                         });
                     } else {
                         clearButton.addEventListener('click', (event: any) => {
-                            const lastChar: string = userInput.value.toString().slice(-1);
-                            resultButton.innerText = mathOperations.includes(lastChar) || !lastChar && typeof calcResult.previous === 'number' && calcResult.previous != 0 ? "ANS" : "=";
 
-                            calcResult.setCurrent(userInput.value);
+                            const lastChar: string = userInput.value.toString().slice(-1);
+                            resultButton.innerText = (mathOperations.includes(lastChar) || !lastChar) && typeof calcResult.previous === 'number' && typeof calcResult.current === 'string' ? "ANS" : "=";
 
                             userInput.focus();
                             vibrateDevice(shortVibationMs);
@@ -134,31 +141,26 @@ export default function App() {
 
                     resultButton?.addEventListener('click', (event: any) => {
 
-                        if (resultButton.innerText === '=') {
-                            if (typeof (calcResult.current) === 'number') {
-                                let finalCurrent_ResultExpression: string = calcResult.current.toString();
-                                let finalPrevious_ResultExpression: string = calcResult.previous.toString();
-
-                                if (finalCurrent_ResultExpression !== finalPrevious_ResultExpression && calcResult.onlyOnce === false) {
-                                    resultText.innerText = finalCurrent_ResultExpression.replaceAll('-', '−');
-                                    calcResult.setPrevEqCurrent();
-                                }
-                                else { userInput.value = resultText.innerText = finalPrevious_ResultExpression; }
-                            }
-                            else if (typeof (calcResult.current) === 'string') {
-                                resultText.innerText = calcResult.current as string;
-                                calcResult.setErrorValues()
-                            }
-                        } else if (resultButton.innerText === 'ANS') {
-                            if (typeof calcResult.previous === 'number') {
-                                userInput.value += calcResult.previous.toString().replaceAll('-', '−');
-                                resultText.innerText = CalcResult.calculate(userInput.value).toString().replaceAll('-', '−');
+                        if (typeof calcResult.current === 'number') {
+                            resultText.innerText = calcResult.current.toString().replaceAll('-', '−');
+                            if (calcResult.previous === calcResult.current) {
+                                userInput.value = resultText.innerText;
                                 resultButton.innerText = "=";
                             }
-                            else { resultText.innerText = calcResult.current as string; }
+                            calcResult.setPrevEqCurrent();
+                        }
+                        else if (typeof calcResult.current === 'string') {
+                            if (typeof calcResult.previous === 'number') {
+                                userInput.value += calcResult.previous.toString().replaceAll('-', '−');
+                                calcResult.setCurrent(userInput.value);
+                                resultButton.innerText = "=";
+                            } else {
+                                resultText.innerText = calcResult.current;
+                                calcResult.setErrorValues();
+                            }
                         }
 
-                        vibrateDevice(100);
+                        vibrateDevice(shortVibationMs);
                         userInput.focus();
                     });
                 }
@@ -178,17 +180,10 @@ export default function App() {
 
                         calcResult.setCurrent(userInput.value);
 
-                        /*
-                            console.dir(calcResult)
-                            console.log("---------------------------------- ZNAMENKE, OPERACIJE, TOČKA ------------------------------")
-                        */
-
-                        if (typeof calcResult.previous === 'number' && typeof calcResult.current === 'string' && userInput.value.length !== 0 && calcResult.previous != 0) {
+                        if (userInput.value.length !== 0 && typeof calcResult.current === 'string' && typeof calcResult.previous === 'number') {
                             vibrateDevice(shortVibationMs);
                             resultButton.innerText = "ANS";
-                        } else {
-                            resultButton.innerText = "=";
-                        }
+                        } else { resultButton.innerText = "="; }
 
                         userInput?.focus();
                     });

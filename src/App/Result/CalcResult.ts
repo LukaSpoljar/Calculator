@@ -16,8 +16,11 @@ export class CalcResult {
     }
 
     public setCurrent(tmpValue: string) {
-        this.onlyOnce = false;
         this.current = CalcResult.calculate(tmpValue);
+        if (this.onlyOnce == true && this.current === ERROR_TEXT) {
+            this.previous = ERROR_TEXT;
+        }
+        this.onlyOnce = false;
     }
 
     public setErrorValues() {
