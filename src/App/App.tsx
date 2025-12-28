@@ -56,12 +56,13 @@ export default function App() {
                 userInput.value = userInput.value.toString().replaceAll('-', '−');
 
                 const lastChar: string = userInput.value.toString().slice(-1).replaceAll('-', '−');
-                resultButton.innerText = ANSOrEqual(lastChar) && calcResult.current !== ERROR_TEXT ? "ANS" : "=";
+                resultButton.innerText = (ANSOrEqual(lastChar) && calcResult.current !== ERROR_TEXT) || (!lastChar && typeof calcResult.previous === 'number' && calcResult.previous != 0) ? "ANS" : "=";
 
                 if (event.key == 'Enter') {
 
                     if (lastChar) {
                         calcResult.setCurrent(userInput.value);
+
                     }
 
                     if (typeof calcResult.current === 'number') {
@@ -125,7 +126,7 @@ export default function App() {
                         clearButton.addEventListener('pointerup', () => {
 
                             const lastChar: string = userInput.value.toString().slice(-1);
-                            resultButton.innerText = ANSOrEqual(lastChar) || (!lastChar && calcResult.current !== 0) ? "ANS" : "=";
+                            resultButton.innerText = (ANSOrEqual(lastChar) && calcResult.current !== ERROR_TEXT) || (!lastChar && typeof calcResult.previous === 'number' && calcResult.previous != 0) ? "ANS" : "=";
 
                             clearInterval(intervalID);
 
@@ -142,7 +143,7 @@ export default function App() {
                         clearButton.addEventListener('click', (event: any) => {
 
                             const lastChar: string = userInput.value.toString().slice(-1);
-                            resultButton.innerText = ANSOrEqual(lastChar) || (!lastChar && calcResult.current !== 0) ? "ANS" : "=";
+                            resultButton.innerText = (ANSOrEqual(lastChar) && calcResult.current !== ERROR_TEXT) || (!lastChar && typeof calcResult.previous === 'number' && calcResult.previous != 0) ? "ANS" : "=";
 
                             userInput.focus();
                             vibrateDevice(shortVibationMs);
