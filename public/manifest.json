@@ -2,6 +2,7 @@
   "short_name": "",
   "name": "Calculator",
   "author":"Ivan Luka Špoljar",
+  "description": "Simply simple web calculator made for simple calculating"
   "icons": [
     {
       "src": "favicon.ico",
